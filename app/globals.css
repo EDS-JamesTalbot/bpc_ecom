@@ -1,26 +1,155 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* =========================================================
+   THEME VARIABLES (UNCHANGED FROM YOUR VERSION)
+   ========================================================= */
 
+@custom-variant dark (&:is(.dark *));
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* =========================================================
+   LIGHT MODE VARIABLES
+   ========================================================= */
+
+:root {
+  --radius: 0.625rem;
+  
+  /* Default fallback values - these will be overridden by database theme settings */
+  --background: #f0f9ff;
+  --foreground: #0c1929;
+
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+
+  --primary: #1DA1F9;
+  --primary-foreground: #ffffff;
+
+  --secondary: #e0f2fe;
+  --secondary-foreground: #0c4a6e;
+
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  --accent: #0ea5e9;
+  --accent-foreground: #ffffff;
+
+  --border: #cbd5e1;
+  --input: #e2e8f0;
+  --ring: #1DA1F9;
+
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+
+  --sidebar-ring: #1DA1F9;
+
+  --tagline: #817F7E;
+
+  /* Header (top bar) - overridden by theme editor */
+  --header_background: #ffffff;
+
+  /* Fonts - overridden by theme editor */
+  --font_buttons: var(--font-geist-sans);
+  --font_menus: var(--font-geist-sans);
+  --font_product_cards: var(--font-geist-sans);
+
+  /* Menu navigation - overridden by theme editor */
+  --nav_link: #64748b;
+  --nav_link_active_bg: #1DA1F9;
+  --nav_link_active_text: #ffffff;
+  --nav_link_active_hover: #0c4a6e;
+}
+
+/* =========================================================
+   BASE STYLING
+   ========================================================= */
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Header bar uses theme variable so Theme Editor can change it */
+  header.site-header {
+    background-color: var(--header_background);
+  }
+  /* Font theme variables - applied by Theme Editor */
+  button,
+  [role="button"],
+  .font-buttons {
+    font-family: var(--font_buttons);
+  }
+  nav.site-nav,
+  .font-menus {
+    font-family: var(--font_menus);
+  }
+  .product-card {
+    font-family: var(--font_product_cards);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* =========================================================
+   CUSTOM POSITIONING CLASSES
+   ========================================================= */
+
+/* Header element positioning */
+.customer-account-position {
+  position: absolute;
+  left: 20px;
+}
+
+.cart-button-position {
+  position: absolute;
+  right: 350px;
+}
+
+.admin-button-position {
+  position: absolute;
+  right: max(1rem, calc((100% - 1800px) / 2 + 1rem));
+}
+
+/* =========================================================
+   CLERK STYLING OVERRIDES
+   ========================================================= */
+
+/* Override Clerk's UserButton dropdown menu item hover states */
+[class*="cl-userButtonPopoverActionButton"]:hover {
+  background-color: #0c4a6e !important;
+  color: white !important;
+}
+
+[class*="cl-userButtonPopoverActionButton"]:hover [class*="cl-userButtonPopoverActionButtonText"] {
+  color: white !important;
+}
+
+[class*="cl-userButtonPopoverActionButton"]:hover [class*="cl-userButtonPopoverActionButtonIcon"] {
+  color: white !important;
+}
+
+/* Override Clerk's primary form buttons (Continue, Sign In, etc.) */
+[class*="cl-formButtonPrimary"] {
+  background-color: #1DA1F9 !important;
+  color: white !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+[class*="cl-formButtonPrimary"]:hover {
+  background-color: #0c4a6e !important;
+  color: white !important;
 }

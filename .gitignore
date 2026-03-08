@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+# drizzle migrations (optional - can commit if you want to track schema changes)
+/drizzle/*.sql
+
+# uploaded images (user-generated content)
+/public/uploads/*
+# Keep the uploads directory itself
+!/public/uploads/.gitkeep
