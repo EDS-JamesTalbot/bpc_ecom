@@ -50,3 +50,6 @@ next-env.d.ts
 /public/uploads/*
 # Keep the uploads directory itself
 !/public/uploads/.gitkeep
+
+.vercel
+.env*.local
