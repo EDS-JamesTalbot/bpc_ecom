@@ -47,6 +47,12 @@ BUSINESS_OWNER_EMAIL="owner@yourdomain.com"
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
 CLERK_SECRET_KEY="sk_test_..."
 
+# Recommended: Fixes session persistence (see docs/CLERK_SESSION_TROUBLESHOOTING.md)
+# NEXT_PUBLIC_CLERK_SIGN_IN_URL=/shop
+# NEXT_PUBLIC_CLERK_SIGN_UP_URL=/shop
+# NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/shop
+# NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/shop
+
 # -----------------------------------
 # NODE ENVIRONMENT
 # -----------------------------------

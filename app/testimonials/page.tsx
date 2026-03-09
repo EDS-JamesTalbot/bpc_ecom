@@ -2,11 +2,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getActiveTestimonials } from "@/src/db/queries/testimonials";
 import { getPageSectionByKey } from "@/src/db/queries/page-sections";
+import { getTenantSlugForRequest } from "@/lib/tenant-context";
+import { withTenantPrefix } from "@/lib/tenant-utils";
 
 /* ---------------------------------------------------------
    TESTIMONIALS PAGE COMPONENT
 --------------------------------------------------------- */
 export default async function TestimonialsPage() {
+  const tenantSlug = await getTenantSlugForRequest();
   // Fetch testimonials from database
   const testimonials = await getActiveTestimonials();
   
@@ -219,7 +222,7 @@ export default async function TestimonialsPage() {
             <p className="text-xl text-[#475569] mb-8 max-w-2xl mx-auto">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
             </p>
-            <Link href="/shop">
+            <Link href={withTenantPrefix('/shop', tenantSlug)}>
               <Button 
                 size="lg" 
                 className="bg-[#1DA1F9] text-white hover:bg-[#0c4a6e] text-xl px-12 py-6 transition-colors"

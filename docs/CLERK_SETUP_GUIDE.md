@@ -40,12 +40,14 @@ Add these variables to your `.env` file:
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxx
 CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxxx
 
-# Optional: Customize redirect URLs
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+# Optional but recommended: Fixes session persistence / stale auth
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/shop
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/shop
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/shop
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/shop
 ```
+
+> **Session issues?** If users get logged out unexpectedly, see [CLERK_SESSION_TROUBLESHOOTING.md](./CLERK_SESSION_TROUBLESHOOTING.md).
 
 ⚠️ **Important:** Never commit your `.env` file to version control!
 

@@ -2,8 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSiteSettingByKey } from "@/src/db/queries/site-settings";
 import { getPageSectionByKey } from "@/src/db/queries/page-sections";
+import { getTenantSlugForRequest } from "@/lib/tenant-context";
+import { withTenantPrefix } from "@/lib/tenant-utils";
 
 export default async function ContactPage() {
+  const tenantSlug = await getTenantSlugForRequest();
   // Fetch site settings
   const contactEmail = await getSiteSettingByKey('contact_email');
   const contactPhone = await getSiteSettingByKey('contact_phone');
@@ -148,7 +151,7 @@ export default async function ContactPage() {
             <p className="text-xl text-[#475569] mb-6">
               Browse our selection of products
             </p>
-            <Link href="/shop">
+            <Link href={withTenantPrefix('/shop', tenantSlug)}>
               <Button 
                 size="lg" 
                 className="bg-[#1DA1F9] text-white hover:bg-[#0c4a6e] text-xl px-10 py-6 transition-colors"

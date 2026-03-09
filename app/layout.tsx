@@ -15,9 +15,9 @@ import { CustomerAccountButton } from "./components/CustomerAccountButton";
 import { MaintenanceGate } from "./components/MaintenanceGate";
 import { getSiteSettingByKey, getSiteSettingsByCategory } from "@/src/db/queries/site-settings";
 import { setAdminActive, isAdminActive, clearAdminActive } from "@/lib/admin-session";
-import { getTenantIdForRequest } from "@/lib/tenant-context";
+import { getTenantIdForRequest, getTenantSlugForRequest } from "@/lib/tenant-context";
 import { TenantProvider } from "./components/TenantProvider";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 
 /* FONT SETUP */
 const geistSans = Geist({
@@ -53,8 +53,19 @@ export default async function RootLayout({
     }
   }
 
-  // Resolve tenant from request (subdomain, custom domain, or default)
-  const tenantId = await getTenantIdForRequest();
+  // Resolve tenant from request (path, subdomain, custom domain, or default)
+  let tenantId: string;
+  try {
+    tenantId = await getTenantIdForRequest();
+  } catch (err) {
+    if (err instanceof Error && err.message === 'TENANT_NOT_FOUND') {
+      notFound();
+    }
+    throw err;
+  }
+
+  const tenantSlug = await getTenantSlugForRequest();
+  const homeHref = tenantSlug ? `/${tenantSlug}` : '/';
 
   if (isAdmin) {
     await setAdminActive();
@@ -157,7 +168,7 @@ export default async function RootLayout({
               <div className="mx-auto w-full max-w-[2400px] px-4 py-6 text-foreground sm:px-6">
                 <div className="flex items-center justify-between gap-4">
                   {/* LOGO + BRAND */}
-                  <Link href="/" className="flex items-center gap-4 text-2xl font-semibold">
+                  <Link href={homeHref} className="flex items-center gap-4 text-2xl font-semibold">
                     {storeLogo ? (
                       <img 
                         src={storeLogo} 

@@ -4,6 +4,8 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { getCustomerByEmail, updateLastLogin } from '@/src/db/queries/customers';
 import { setCustomerSession, clearCustomerSession } from '@/lib/customer-auth';
+import { getTenantSlugForRequest } from '@/lib/tenant-context';
+import { withTenantPrefix } from '@/lib/tenant-utils';
 import { redirect } from 'next/navigation';
 
 /**
@@ -87,5 +89,6 @@ export async function customerLogin(input: LoginInput) {
  */
 export async function customerLogout() {
   await clearCustomerSession();
-  redirect('/shop');
+  const tenantSlug = await getTenantSlugForRequest();
+  redirect(withTenantPrefix('/shop', tenantSlug));
 }

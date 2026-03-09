@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { db } from '@/src/db';
 import { tenantsTable, type Tenant } from '@/src/db/schema';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, ilike } from 'drizzle-orm';
 
 // ============================================
 // READ QUERIES
@@ -9,12 +9,13 @@ import { eq, asc } from 'drizzle-orm';
 
 /**
  * Get tenant by slug (e.g. 'default', 'acme')
+ * Case-insensitive to handle URL normalization (browsers may lowercase paths)
  */
 export async function getTenantBySlug(slug: string): Promise<Tenant | null> {
   const [tenant] = await db
     .select()
     .from(tenantsTable)
-    .where(eq(tenantsTable.slug, slug));
+    .where(ilike(tenantsTable.slug, slug));
   return tenant ?? null;
 }
 
@@ -51,11 +52,11 @@ export async function getAllTenants(): Promise<Tenant[]> {
 }
 
 /**
- * Get the default tenant (slug = 'default')
- * Use this for single-tenant mode until Phase 2 tenant resolution is wired
+ * Get the default tenant (slug = 'default' or 'legacy-default')
+ * Use when no tenant is specified in path/subdomain
  */
 export async function getDefaultTenant(): Promise<Tenant | null> {
-  return getTenantBySlug('default');
+  return getTenantBySlug('default') ?? getTenantBySlug('legacy-default');
 }
 
 /**

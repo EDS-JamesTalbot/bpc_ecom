@@ -7,9 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Loader2, LogIn } from 'lucide-react';
 import { customerLogin } from '@/app/actions/customer-auth-actions';
 import { useRouter } from 'next/navigation';
+import { useTenantSlug } from '@/app/hooks/useTenantSlug';
+import { withTenantPrefix } from '@/lib/tenant-utils';
 
 export function CustomerLoginForm() {
   const router = useRouter();
+  const tenantSlug = useTenantSlug();
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
@@ -27,7 +30,7 @@ export function CustomerLoginForm() {
       
       if (result.success) {
         // Redirect to account page
-        router.push('/my-account');
+        router.push(withTenantPrefix('/my-account', tenantSlug));
         router.refresh();
       } else {
         setErrors({ general: result.error || 'Login failed' });

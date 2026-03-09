@@ -4,9 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useTenantId } from "./TenantProvider";
+import { useTenantSlug } from "@/app/hooks/useTenantSlug";
+import { withTenantPrefix } from "@/lib/tenant-utils";
 
 export function Navigation() {
   const pathname = usePathname();
+  const tenantSlug = useTenantSlug();
   const { user } = useUser();
   const tenantId = useTenantId();
   const userTenantId = user?.publicMetadata?.tenantId as string | undefined;
@@ -34,15 +37,16 @@ export function Navigation() {
           return null;
         }
 
+        const href = withTenantPrefix(link.href, tenantSlug);
         // For home, exact match; for others, check if pathname starts with the link href
         const isActive = link.href === "/" 
-          ? pathname === "/" 
-          : pathname.startsWith(link.href);
+          ? pathname === "/" || pathname === `/${tenantSlug}` || pathname === `/${tenantSlug}/`
+          : pathname.startsWith(href);
         
         return (
           <Link
             key={link.href}
-            href={link.href}
+            href={href}
             className={`
               text-lg font-semibold transition-colors px-4 py-2 rounded-lg
               ${

@@ -10,24 +10,36 @@ import {
 
 export const SUPER_ADMIN_TENANT_COOKIE = 'super_admin_tenant_id';
 
+export { isReservedPathSegment } from './tenant-utils';
+
 /**
- * Resolve tenant ID from request headers (Host).
- * Supports:
- * - Custom domain (e.g. store.acme.com → tenants.custom_domain)
- * - Subdomain (e.g. acme.yourplatform.com → tenant slug 'acme')
- * - Fallback to default tenant (localhost, www, or unknown)
+ * Resolve tenant ID from request headers.
+ * Supports (in order):
+ * - Path-based: /loveys-soap/shop → tenant slug 'loveys-soap' (set by proxy via x-tenant-slug)
+ * - Custom domain: store.acme.com → tenants.custom_domain
+ * - Subdomain: acme.yourplatform.com → tenant slug 'acme'
+ * - Fallback: default tenant
  */
 export async function getTenantFromHeaders(
   headersList: Headers
 ): Promise<string | null> {
+  // 1. Path-based tenant (e.g. /loveys-soap/shop)
+  const pathSlug = headersList.get('x-tenant-slug');
+  if (pathSlug) {
+    const bySlug = await getTenantBySlug(pathSlug);
+    if (bySlug) return bySlug.id;
+    // Invalid tenant slug in path → signal 404 (caller should handle)
+    throw new Error('TENANT_NOT_FOUND');
+  }
+
   const host = headersList.get('host') || '';
   const hostname = (host.split(':')[0] ?? '').toLowerCase();
 
-  // 1. Custom domain lookup
+  // 2. Custom domain lookup
   const byDomain = await getTenantByDomain(hostname);
   if (byDomain) return byDomain.id;
 
-  // 2. Subdomain resolution
+  // 3. Subdomain resolution
   const baseDomain =
     process.env.NEXT_PUBLIC_BASE_DOMAIN || 'localhost';
   const isBaseDomain = hostname === baseDomain || hostname.endsWith(`.${baseDomain}`);
@@ -41,13 +53,13 @@ export async function getTenantFromHeaders(
     }
   }
 
-  // 3. localhost without subdomain → default
+  // 4. localhost without subdomain → default
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     const defaultTenant = await getDefaultTenant();
     return defaultTenant?.id ?? null;
   }
 
-  // 4. Unknown host → default
+  // 5. Unknown host → default
   const defaultTenant = await getDefaultTenant();
   return defaultTenant?.id ?? null;
 }
@@ -85,7 +97,10 @@ export const getTenantIdForRequest = cache(async (): Promise<string> => {
     const headersList = await headers();
     const id = await getTenantFromHeaders(headersList);
     if (id) return id;
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message === 'TENANT_NOT_FOUND') {
+      throw err; // Re-throw so layout can call notFound()
+    }
     // Not in request context (e.g. seed script, cron)
   }
   const defaultTenant = await getDefaultTenant();
@@ -93,4 +108,20 @@ export const getTenantIdForRequest = cache(async (): Promise<string> => {
     throw new Error('Default tenant not found. Run: npm run db:migrate:multi-tenant');
   }
   return defaultTenant.id;
+});
+
+/**
+ * Get tenant slug for the current request (for building links in Server Components).
+ * Returns the path-based tenant slug when present (x-tenant-slug header), else null.
+ * Use null for default tenant (no path prefix).
+ */
+export const getTenantSlugForRequest = cache(async (): Promise<string | null> => {
+  try {
+    const headersList = await headers();
+    const pathSlug = headersList.get('x-tenant-slug');
+    if (pathSlug) return pathSlug;
+  } catch {
+    // Not in request context
+  }
+  return null;
 });

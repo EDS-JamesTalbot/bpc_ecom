@@ -1,5 +1,30 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { isReservedPathSegment } from '@/lib/tenant-utils';
+
+// Path-based tenant: /loveys-soap/shop → tenant slug in header, rewrite to /shop
+function handlePathBasedTenant(req: Request): NextResponse | null {
+  const url = new URL(req.url);
+  const pathname = url.pathname;
+  const segments = pathname.split('/').filter(Boolean);
+  const first = segments[0];
+
+  if (!first) return null; // "/" - no tenant in path
+  if (isReservedPathSegment(first)) return null; // "/shop", "/admin" etc - no tenant
+
+  // First segment is tenant slug: /loveys-soap or /loveys-soap/shop
+  const tenantSlug = first;
+  const restPath = '/' + segments.slice(1).join('/') || '/';
+  const rewriteUrl = new URL(restPath, url.origin);
+  rewriteUrl.search = url.search;
+
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-tenant-slug', tenantSlug);
+
+  return NextResponse.rewrite(rewriteUrl, {
+    request: { headers: requestHeaders },
+  });
+}
 
 // Define public routes (accessible without sign-in)
 const isPublicRoute = createRouteMatcher([
@@ -25,6 +50,10 @@ const isAdminRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // Path-based tenant: /loveys-soap/shop → rewrite + set header
+  const tenantResponse = handlePathBasedTenant(req);
+  if (tenantResponse) return tenantResponse;
+
   const { userId } = await auth();
   
   // Skip auth protection for public routes (including admin/content temporarily)
@@ -34,9 +63,11 @@ export default clerkMiddleware(async (auth, req) => {
   
   // Protect admin routes
   if (isAdminRoute(req)) {
-    // If not signed in, redirect to shop page
+    // If not signed in, redirect to shop page (preserve tenant if path-based)
     if (!userId) {
-      const signInUrl = new URL('/shop', req.url);
+      const pathSlug = req.headers.get('x-tenant-slug');
+      const shopPath = pathSlug ? `/${pathSlug}/shop` : '/shop';
+      const signInUrl = new URL(shopPath, req.url);
       return NextResponse.redirect(signInUrl);
     }
     

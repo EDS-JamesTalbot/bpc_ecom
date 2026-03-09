@@ -13,10 +13,13 @@ import {
 } from "@/components/ui/sheet";
 import { useCart } from "./CartContext";
 import { CheckoutDialog } from "./CheckoutDialog";
+import { useTenantSlug } from "@/app/hooks/useTenantSlug";
+import { withTenantPrefix } from "@/lib/tenant-utils";
 
 export function CartView() {
   const router = useRouter();
   const pathname = usePathname();
+  const tenantSlug = useTenantSlug();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const {
     cartItems,
@@ -37,7 +40,7 @@ export function CartView() {
 
   const handleContinueShopping = () => {
     setIsCartOpen(false);
-    router.push("/shop");
+    router.push(withTenantPrefix("/shop", tenantSlug));
   };
 
   // Open cart when returning from payment-failed (e.g. ?openCart=1)

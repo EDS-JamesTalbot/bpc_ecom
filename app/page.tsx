@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getPageSectionByKey } from "@/src/db/queries/page-sections";
+import { getTenantSlugForRequest } from "@/lib/tenant-context";
+import { withTenantPrefix } from "@/lib/tenant-utils";
 
 export default async function Home() {
+  const tenantSlug = await getTenantSlugForRequest();
   // Fetch page sections from database
   const heroSection = await getPageSectionByKey('home_hero');
   const aboutSection = await getPageSectionByKey('home_about');
@@ -109,7 +112,7 @@ export default async function Home() {
             <p className="text-lg md:text-xl text-[#475569] mb-5 md:mb-6 whitespace-nowrap">
               {heroContent.subheading}
             </p>
-            <Link href={heroContent.buttonLink}>
+            <Link href={withTenantPrefix(heroContent.buttonLink, tenantSlug)}>
               <Button 
                 size="lg" 
                 className="bg-[#1DA1F9] text-white hover:bg-[#0c4a6e] text-lg md:text-xl px-8 py-4 md:px-10 md:py-5 transition-colors"
@@ -215,7 +218,7 @@ export default async function Home() {
             <p className="text-xl text-[#475569] mb-8 max-w-2xl mx-auto">
               {ctaContent.text}
             </p>
-            <Link href={ctaContent.buttonLink}>
+            <Link href={withTenantPrefix(ctaContent.buttonLink, tenantSlug)}>
               <Button 
                 size="lg" 
                 className="bg-[#1DA1F9] text-white hover:bg-[#0c4a6e] text-xl px-12 py-6 transition-colors"

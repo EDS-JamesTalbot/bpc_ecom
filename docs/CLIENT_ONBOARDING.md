@@ -51,7 +51,11 @@ The client signs up on your site using the Clerk sign-in modal (email/password o
    ```
 5. Save
 
-**To get the tenant UUID:** Run `npm run db:studio`, open the `tenants` table, and copy the `id` (UUID) for the tenant you created.
+**To get the tenant UUID:**
+- **Option A:** Visit `https://your-site.vercel.app/api/debug/tenant-id` while signed in as admin. Copy the `tenantId` from the response.
+- **Option B:** Run `npm run db:studio`, open the `tenants` table, and copy the `id` (UUID) for the tenant.
+
+**Important:** The tenantId in Clerk must match the tenant resolved from the URL the client visits. For the main site (e.g. bpc-ecom.vercel.app), that's the **default** tenant. Use the default tenant's UUID in Clerk for clients who edit the main site.
 
 ### 4. Configure Domain (if using subdomain or custom domain)
 

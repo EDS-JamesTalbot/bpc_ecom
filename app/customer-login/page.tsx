@@ -1,13 +1,17 @@
 import { getCustomerSession } from '@/lib/customer-auth';
+import { getTenantSlugForRequest } from '@/lib/tenant-context';
+import { withTenantPrefix } from '@/lib/tenant-utils';
 import { redirect } from 'next/navigation';
 import { CustomerLoginForm } from './CustomerLoginForm';
 
 export default async function CustomerLoginPage() {
+  const tenantSlug = await getTenantSlugForRequest();
+  
   // If already logged in, redirect to account page
   const session = await getCustomerSession();
   
   if (session) {
-    redirect('/my-account');
+    redirect(withTenantPrefix('/my-account', tenantSlug));
   }
   
   return (
@@ -28,14 +32,14 @@ export default async function CustomerLoginPage() {
           <div className="mt-6 pt-6 border-t border-gray-200 text-center text-sm text-[#475569]">
             <p>
               Don't have an account?{' '}
-              <a href="/shop" className="text-primary font-semibold hover:underline">
+              <a href={withTenantPrefix('/shop', tenantSlug)} className="text-primary font-semibold hover:underline">
                 Create one during checkout
               </a>
             </p>
           </div>
           
           <div className="mt-4 text-center">
-            <a href="/shop" className="text-sm text-[#5A6A3E] hover:underline">
+            <a href={withTenantPrefix('/shop', tenantSlug)} className="text-sm text-[#5A6A3E] hover:underline">
               ← Continue shopping as guest
             </a>
           </div>

@@ -7,6 +7,8 @@ import { User, LogOut } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { customerLogout } from '@/app/actions/customer-auth-actions';
+import { useTenantSlug } from '@/app/hooks/useTenantSlug';
+import { withTenantPrefix } from '@/lib/tenant-utils';
 
 export function CustomerAccountButton() {
   const { user } = useUser();
@@ -14,6 +16,7 @@ export function CustomerAccountButton() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const tenantSlug = useTenantSlug();
   
   // Check authentication status
   const checkAuth = async () => {
@@ -40,7 +43,7 @@ export function CustomerAccountButton() {
     try {
       await customerLogout();
       setIsLoggedIn(false);
-      router.push('/');
+      router.push(withTenantPrefix('/', tenantSlug));
       router.refresh();
     } catch (error) {
       console.error('Logout error:', error);
@@ -55,7 +58,7 @@ export function CustomerAccountButton() {
   if (isLoggedIn) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/my-account">
+        <Link href={withTenantPrefix('/my-account', tenantSlug)}>
           <Button
             variant="outline"
             className="gap-2 border-primary text-primary hover:bg-primary hover:text-white"
@@ -77,7 +80,7 @@ export function CustomerAccountButton() {
   }
   
   return (
-    <Link href="/customer-login" className={isAdmin ? 'pointer-events-none' : ''}>
+    <Link href={withTenantPrefix('/customer-login', tenantSlug)} className={isAdmin ? 'pointer-events-none' : ''}>
       <Button
         variant="outline"
         disabled={isAdmin}
