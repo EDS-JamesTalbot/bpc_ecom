@@ -17,7 +17,7 @@ export async function getTenantFromHeaders(
   headersList: Headers
 ): Promise<string | null> {
   const host = headersList.get('host') || '';
-  const hostname = host.split(':')[0].toLowerCase();
+  const hostname = (host.split(':')[0] ?? '').toLowerCase();
 
   // 1. Custom domain lookup
   const byDomain = await getTenantByDomain(hostname);
