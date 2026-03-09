@@ -1,13 +1,18 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { requireAdminWithTenantAccess } from '@/lib/admin-auth';
 import { getAllProducts } from '@/src/db/queries/products';
 import { getAllTestimonials } from '@/src/db/queries/testimonials';
 import { getAllPageSections } from '@/src/db/queries/page-sections';
 import { getAllSiteSettings } from '@/src/db/queries/site-settings';
 
-// Note: Authentication disabled due to Clerk JWT infinite loop issue
-// The Content link is only visible to admins in Navigation component
 export default async function AdminContentDashboard() {
+  try {
+    await requireAdminWithTenantAccess();
+  } catch {
+    redirect('/shop');
+  }
   let products, testimonials, pageSections, siteSettings;
   
   try {

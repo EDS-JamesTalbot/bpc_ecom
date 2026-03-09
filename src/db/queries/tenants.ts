@@ -48,3 +48,24 @@ export const getDefaultTenantId = cache(async (): Promise<string> => {
   }
   return tenant.id;
 });
+
+/**
+ * Create a new tenant (1 client = 1 tenant)
+ * Call this when onboarding a new client.
+ */
+export async function createTenant(slug: string, name: string, customDomain?: string): Promise<Tenant> {
+  const [tenant] = await db
+    .insert(tenantsTable)
+    .values({
+      slug,
+      name,
+      customDomain: customDomain ?? null,
+    })
+    .returning();
+
+  if (!tenant) {
+    throw new Error('Failed to create tenant');
+  }
+
+  return tenant;
+}

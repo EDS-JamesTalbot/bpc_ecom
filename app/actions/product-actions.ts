@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { requireAdminWithTenantAccess } from '@/lib/admin-auth';
 import { 
   getAllProducts, 
   getProductById, 
@@ -12,28 +12,6 @@ import {
   getPaginatedProducts
 } from '@/src/db/queries/products';
 import type { Product } from '@/src/db/schema';
-
-/**
- * Helper function to check if user is admin
- * Throws error if not authenticated or not admin
- */
-async function requireAdminAuth() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    throw new Error('Unauthorized: You must be signed in to perform this action');
-  }
-  
-  // Fetch user data directly from Clerk to get publicMetadata
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  
-  const userRole = user.publicMetadata?.role;
-  
-  if (userRole !== 'admin') {
-    throw new Error('Forbidden: Admin access required');
-  }
-}
 
 /**
  * Validation Schemas (adminPassword removed - using Clerk authentication)
@@ -112,7 +90,7 @@ export async function updateProduct(input: UpdateProductInput): Promise<Product 
     const validated = updateProductSchema.parse(input);
     
     // 2. Verify admin authentication via Clerk
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     // 3. Prepare update data (type-safe)
     type ProductUpdateData = Partial<Pick<Product, 'name' | 'description' | 'image' | 'isActive'>> & {
@@ -155,7 +133,7 @@ export async function createProduct(input: CreateProductInput): Promise<Product>
     const validated = createProductSchema.parse(input);
     
     // 2. Verify admin authentication via Clerk
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     // 3. Create product in database
     const newProduct = await createProductQuery({
@@ -188,7 +166,7 @@ export async function deleteProduct(input: DeleteProductInput): Promise<void> {
     const validated = deleteProductSchema.parse(input);
     
     // 2. Verify admin authentication via Clerk
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     // 3. Delete product from database
     await deleteProductQuery(validated.productId);

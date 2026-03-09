@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { requireAdminWithTenantAccess } from '@/lib/admin-auth';
 import {
   createTestimonial,
   updateTestimonial,
@@ -21,28 +21,6 @@ import {
   deleteSiteSetting,
 } from '@/src/db/queries/site-settings';
 
-/**
- * Helper function to check if user is admin
- * Throws error if not authenticated or not admin
- */
-async function requireAdminAuth() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    throw new Error('Unauthorized: You must be signed in to perform this action');
-  }
-  
-  // Fetch user data directly from Clerk to get publicMetadata
-  const client = await clerkClient();
-  const user = await client.users.getUser(userId);
-  
-  const userRole = user.publicMetadata?.role;
-  
-  if (userRole !== 'admin') {
-    throw new Error('Forbidden: Admin access required');
-  }
-}
-
 // ============================================
 // TESTIMONIAL ACTIONS
 // ============================================
@@ -60,7 +38,7 @@ type TestimonialInput = z.infer<typeof testimonialSchema>;
 export async function createTestimonialAction(input: TestimonialInput) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const validated = testimonialSchema.parse(input);
     
@@ -85,7 +63,7 @@ export async function createTestimonialAction(input: TestimonialInput) {
 export async function updateTestimonialAction(id: number, input: Partial<TestimonialInput>) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const validated = testimonialSchema.partial().parse(input);
     
@@ -114,7 +92,7 @@ export async function updateTestimonialAction(id: number, input: Partial<Testimo
 export async function deleteTestimonialAction(id: number) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     await deleteTestimonial(id);
     
@@ -134,7 +112,7 @@ export async function deleteTestimonialAction(id: number) {
 export async function toggleTestimonialActiveAction(id: number) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const updatedTestimonial = await toggleTestimonialActive(id);
     
@@ -172,7 +150,7 @@ type PageSectionInput = z.infer<typeof pageSectionSchema>;
 export async function upsertPageSectionAction(input: PageSectionInput) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const validated = pageSectionSchema.parse(input);
     
@@ -204,7 +182,7 @@ export async function upsertPageSectionAction(input: PageSectionInput) {
 export async function updatePageSectionAction(id: number, input: Partial<PageSectionInput>) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const validated = pageSectionSchema.partial().parse(input);
     
@@ -242,7 +220,7 @@ export async function updatePageSectionAction(id: number, input: Partial<PageSec
 export async function deletePageSectionAction(id: number) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     await deletePageSection(id);
     
@@ -261,7 +239,7 @@ export async function deletePageSectionAction(id: number) {
 export async function togglePageSectionActiveAction(id: number) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const updated = await togglePageSectionActive(id);
     
@@ -306,7 +284,7 @@ type SiteSettingInput = z.infer<typeof siteSettingSchema>;
 export async function upsertSiteSettingAction(input: SiteSettingInput) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     const validated = siteSettingSchema.parse(input);
     
@@ -337,7 +315,7 @@ export async function updateSiteSettingAction(id: number, input: Partial<SiteSet
   try {
     // Note: Authentication disabled due to Clerk JWT infinite loop issue
     // The Content link is only visible to admins in Navigation component
-    // await requireAdminAuth();
+    // await requireAdminWithTenantAccess();
     
     // Use update schema to avoid applying defaults
     const validated = siteSettingUpdateSchema.parse(input);
@@ -368,7 +346,7 @@ export async function updateSiteSettingAction(id: number, input: Partial<SiteSet
 export async function deleteSiteSettingAction(id: number) {
   try {
     // Verify admin authentication
-    await requireAdminAuth();
+    await requireAdminWithTenantAccess();
     
     await deleteSiteSetting(id);
     

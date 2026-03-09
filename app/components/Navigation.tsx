@@ -3,13 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { useTenantId } from "./TenantProvider";
 
 export function Navigation() {
   const pathname = usePathname();
   const { user } = useUser();
-  
-  // Check if user has admin role
-  const isAdmin = user?.publicMetadata?.role === 'admin';
+  const tenantId = useTenantId();
+  const userTenantId = user?.publicMetadata?.tenantId as string | undefined;
+
+  // Admin with tenant access (1 client = 1 tenant)
+  const isAdmin = user?.publicMetadata?.role === 'admin' && (
+    !userTenantId || (tenantId && userTenantId === tenantId)
+  );
 
   const links = [
     { href: "/", label: "Home" },

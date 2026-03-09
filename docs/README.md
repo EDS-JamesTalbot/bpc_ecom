@@ -273,6 +273,7 @@ app/
 - [ADMIN_CMS_SETUP_GUIDE.md](./ADMIN_CMS_SETUP_GUIDE.md) - Admin CMS (page sections, testimonials, site settings)
 - [CHECKOUT_SETUP.md](./CHECKOUT_SETUP.md) - Checkout flow documentation
 - [MULTI_TENANT.md](./MULTI_TENANT.md) - Multi-tenant architecture
+- [CLIENT_ONBOARDING.md](./CLIENT_ONBOARDING.md) - Onboard clients (1 client = 1 tenant)
 - [CUSTOMER_REGISTRATION_IMPLEMENTATION.md](../CUSTOMER_REGISTRATION_IMPLEMENTATION.md) - Customer accounts & order history
 
 ## 🧪 Testing

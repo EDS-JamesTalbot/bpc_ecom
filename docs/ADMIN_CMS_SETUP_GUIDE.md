@@ -137,10 +137,11 @@ These pages now pull content from the database:
 
 ## 🔒 Security Note
 
-Admin pages are protected by **Clerk** authentication. To grant admin access:
-1. Go to [Clerk Dashboard](https://dashboard.clerk.com) → Users → Select your user
-2. Edit **Public metadata** and add: `{"role": "admin"}`
-3. Save. You can now access `/admin/*` routes.
+Admin pages are protected by **Clerk** authentication.
+
+**For you (super-admin):** Add `{"role": "admin"}` to Public metadata — you can access all tenants.
+
+**For clients (1 client = 1 tenant):** Add `{"role": "admin", "tenantId": "their-tenant-uuid"}` — they can only edit their own store. See [CLIENT_ONBOARDING.md](./CLIENT_ONBOARDING.md) for the full onboarding flow.
 
 ## 📚 Full Documentation
 

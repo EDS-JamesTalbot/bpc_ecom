@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Lock, Unlock, Clock } from "lucide-react";
+import { useTenantId } from "./TenantProvider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,8 +32,12 @@ export function AdminButton() {
   const [showPendingModal, setShowPendingModal] = useState(false);
   const signInTriggerRef = useRef<HTMLButtonElement>(null);
   
-  // Check if user has admin role from Clerk metadata
-  const isAdmin = user?.publicMetadata?.role === 'admin';
+  // Check if user has admin role AND tenant access (1 client = 1 tenant)
+  const tenantId = useTenantId();
+  const userTenantId = user?.publicMetadata?.tenantId as string | undefined;
+  const isAdmin = user?.publicMetadata?.role === 'admin' && (
+    !userTenantId || (tenantId && userTenantId === tenantId)
+  );
 
   const handleAdminLoginClick = async () => {
     try {

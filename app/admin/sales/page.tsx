@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+import { requireAdminWithTenantAccess } from '@/lib/admin-auth';
 import {
   getProductSalesSummary,
   getTopCustomers,
@@ -8,8 +10,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SalesChart } from './SalesChart';
 
-// Note: Admin-only - Sales link is only visible to admins in Navigation
 export default async function AdminSalesPage() {
+  try {
+    await requireAdminWithTenantAccess();
+  } catch {
+    redirect('/shop');
+  }
   let productSummary: Awaited<ReturnType<typeof getProductSalesSummary>>;
   let topCustomers: Awaited<ReturnType<typeof getTopCustomers>>;
   let salesOverTime: Awaited<ReturnType<typeof getSalesOverTime>>;
