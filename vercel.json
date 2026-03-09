@@ -4,19 +4,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "@clerk_publishable_key",
-    "CLERK_SECRET_KEY": "@clerk_secret_key",
-    "DATABASE_URL": "@database_url",
-    "BPC_GATEWAY_URL": "@bpc_gateway_url",
-    "BPC_API_KEY": "@bpc_api_key",
-    "BPC_WEBHOOK_SECRET": "@bpc_webhook_secret",
-    "RESEND_API_KEY": "@resend_api_key",
-    "BUSINESS_OWNER_EMAIL": "@business_owner_email",
-    "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
-    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
-    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret"
-  },
   "git": {
     "deploymentEnabled": {
       "main": true,
