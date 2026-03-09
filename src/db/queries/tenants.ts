@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { db } from '@/src/db';
 import { tenantsTable, type Tenant } from '@/src/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 
 // ============================================
 // READ QUERIES
@@ -19,6 +19,17 @@ export async function getTenantBySlug(slug: string): Promise<Tenant | null> {
 }
 
 /**
+ * Get tenant by ID
+ */
+export async function getTenantById(id: string): Promise<Tenant | null> {
+  const [tenant] = await db
+    .select()
+    .from(tenantsTable)
+    .where(eq(tenantsTable.id, id));
+  return tenant ?? null;
+}
+
+/**
  * Get tenant by custom domain
  */
 export async function getTenantByDomain(domain: string): Promise<Tenant | null> {
@@ -27,6 +38,16 @@ export async function getTenantByDomain(domain: string): Promise<Tenant | null> 
     .from(tenantsTable)
     .where(eq(tenantsTable.customDomain, domain));
   return tenant ?? null;
+}
+
+/**
+ * Get all tenants (for super-admin selector)
+ */
+export async function getAllTenants(): Promise<Tenant[]> {
+  return await db
+    .select()
+    .from(tenantsTable)
+    .orderBy(asc(tenantsTable.name));
 }
 
 /**

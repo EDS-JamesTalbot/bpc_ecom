@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
-import { Lock, Unlock, Clock } from "lucide-react";
+import { Lock, Unlock, Clock, Store } from "lucide-react";
 import { useTenantId } from "./TenantProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { TenantSelectorModal } from "./TenantSelectorModal";
 
 /**
  * AdminButton Component
@@ -38,6 +39,8 @@ export function AdminButton() {
   const isAdmin = user?.publicMetadata?.role === 'admin' && (
     !userTenantId || (tenantId && userTenantId === tenantId)
   );
+  const isSuperAdmin = user?.publicMetadata?.role === 'admin' && !userTenantId;
+  const [showTenantModal, setShowTenantModal] = useState(false);
 
   const handleAdminLoginClick = async () => {
     try {
@@ -94,6 +97,18 @@ export function AdminButton() {
       {/* User IS signed in */}
       <SignedIn>
         <div className="flex items-center gap-2">
+          {/* Super-admin only: Switch store button */}
+          {isSuperAdmin && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full gap-2"
+              onClick={() => setShowTenantModal(true)}
+            >
+              <Store className="h-4 w-4" />
+              Switch store
+            </Button>
+          )}
           {/* Show admin status badge if user has admin role */}
           {isAdmin && (
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#1DA1F9] text-white text-sm font-semibold shadow-lg border-2 border-[#1DA1F9]">
@@ -113,6 +128,9 @@ export function AdminButton() {
           />
         </div>
       </SignedIn>
+
+      {/* Super-admin tenant selector modal */}
+      <TenantSelectorModal open={showTenantModal} onOpenChange={setShowTenantModal} />
     </>
   );
 }

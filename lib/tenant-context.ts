@@ -1,10 +1,14 @@
 import { cache } from 'react';
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import {
   getTenantBySlug,
   getTenantByDomain,
+  getTenantById,
   getDefaultTenant,
 } from '@/src/db/queries/tenants';
+
+export const SUPER_ADMIN_TENANT_COOKIE = 'super_admin_tenant_id';
 
 /**
  * Resolve tenant ID from request headers (Host).
@@ -51,9 +55,32 @@ export async function getTenantFromHeaders(
 /**
  * Get tenant ID for the current request (cached per-request).
  * Use in Server Components and Server Actions.
+ * Super-admins can override via cookie (super_admin_tenant_id).
  * Falls back to default tenant when not in request context (e.g. seed scripts).
  */
 export const getTenantIdForRequest = cache(async (): Promise<string> => {
+  try {
+    const { userId } = await auth();
+    if (userId) {
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      const role = user.publicMetadata?.role as string | undefined;
+      const userTenantId = user.publicMetadata?.tenantId as string | undefined;
+      const isSuperAdmin = role === 'admin' && !userTenantId;
+
+      if (isSuperAdmin) {
+        const cookieStore = await cookies();
+        const overrideId = cookieStore.get(SUPER_ADMIN_TENANT_COOKIE)?.value;
+        if (overrideId) {
+          const tenant = await getTenantById(overrideId);
+          if (tenant) return tenant.id;
+        }
+      }
+    }
+  } catch {
+    // Auth/cookies not available (e.g. seed script)
+  }
+
   try {
     const headersList = await headers();
     const id = await getTenantFromHeaders(headersList);
