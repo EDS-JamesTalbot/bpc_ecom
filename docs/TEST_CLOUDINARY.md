@@ -53,7 +53,7 @@ Should return:
 {
   "signature": "...",
   "timestamp": 1234567890,
-  "folder": "websitetemplate/products",
+  "folder": "BPC_Ecom/products",
   "cloudName": "dxqrfaqux",
   "apiKey": "753982799626469"
 }

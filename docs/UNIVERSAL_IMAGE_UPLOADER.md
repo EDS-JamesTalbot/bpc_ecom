@@ -104,7 +104,7 @@ https://yourwebsite.com/images/product.jpg
 
 **Storage location:**
 ```
-websitetemplate/
+BPC_Ecom/
 └── public/
     └── uploads/
         ├── 1234567890-image1.jpg

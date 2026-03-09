@@ -71,7 +71,7 @@ npm run test:all          # Run everything
    git add .
    git commit -m "Add enhancements: CDN, Testing, CI/CD"
    git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   git remote add origin https://github.com/EDS-JamesTalbot/BPC_Ecom.git
    git push -u origin main
    ```
 
@@ -179,7 +179,7 @@ npm run test:e2e:ui
 
 Edit `app/api/upload/route.ts`:
 ```typescript
-const folder = 'websitetemplate/products'; // Change this
+const folder = 'BPC_Ecom/products'; // Change this to your project folder
 ```
 
 ### Add More Test Coverage

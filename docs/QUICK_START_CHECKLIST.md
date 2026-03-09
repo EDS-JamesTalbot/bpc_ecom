@@ -7,7 +7,7 @@ Follow these steps to get your checkout system up and running.
 ### Step 1: Create Neon Database
 - [ ] Go to [console.neon.tech](https://console.neon.tech/)
 - [ ] Sign up or log in
-- [ ] Create a new project named "loveysoap"
+- [ ] Create a new project (e.g., "BPC_Ecom" or your business name)
 - [ ] Copy your connection string (starts with `postgresql://`)
 
 ### Step 2: Configure Environment
@@ -17,7 +17,7 @@ Follow these steps to get your checkout system up and running.
 
 ### Step 3: Initialize Database
 ```powershell
-cd c:\Users\JamesTalbot\.cursor\loveysoap
+cd BPC_Ecom
 npm run db:push
 ```
 - [ ] Run the command above

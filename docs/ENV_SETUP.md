@@ -40,11 +40,12 @@ EMAIL_FROM_NAME="Your Business Name"
 BUSINESS_OWNER_EMAIL="owner@yourdomain.com"
 
 # -----------------------------------
-# ADMIN AUTHENTICATION
+# CLERK (Admin Authentication)
 # -----------------------------------
-# Set a strong password for admin access
-# This protects product management features
-ADMIN_PASSWORD="your_secure_admin_password_here"
+# Get these from: https://dashboard.clerk.com
+# Admin users: Set Public metadata to {"role": "admin"} in Clerk Dashboard
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
 
 # -----------------------------------
 # NODE ENVIRONMENT

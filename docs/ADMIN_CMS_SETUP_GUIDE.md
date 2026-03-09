@@ -4,7 +4,7 @@ This guide will help you get the Admin Content Management System up and running 
 
 ## 🚀 Quick Start
 
-### Step 1: Generate & Apply Database Migration ################ test 1
+### Step 1: Generate & Apply Database Migration
 
 ```bash
 npm run db:generate
@@ -40,6 +40,9 @@ Then visit:
 - **Testimonials**: http://localhost:3000/admin/content/testimonials
 - **Page Sections**: http://localhost:3000/admin/content/page-sections
 - **Site Settings**: http://localhost:3000/admin/content/site-settings
+- **Theme Editor**: http://localhost:3000/admin/content/theme-editor
+
+> **Note:** Admin access requires Clerk. Set your user's Public metadata to `{"role": "admin"}` in the [Clerk Dashboard](https://dashboard.clerk.com).
 
 ## 🎯 What Can You Edit?
 
@@ -116,6 +119,7 @@ Update global information:
 - `/admin/content/testimonials` - Manage testimonials
 - `/admin/content/page-sections` - Edit page content
 - `/admin/content/site-settings` - Update site settings
+- `/admin/content/theme-editor` - Customize theme colors
 
 ### Updated Public Pages
 These pages now pull content from the database:
@@ -133,30 +137,10 @@ These pages now pull content from the database:
 
 ## 🔒 Security Note
 
-⚠️ **IMPORTANT**: The admin pages have **NO AUTHENTICATION** by default.
-
-Before deploying to production, you MUST:
-1. Add authentication (Clerk, NextAuth.js, etc.)
-2. Protect `/admin/*` routes with middleware
-3. Add authorization checks to Server Actions
-
-Example middleware:
-```typescript
-// middleware.ts
-export function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    // TODO: Add your authentication check here
-    const isAdmin = checkIfUserIsAdmin(request);
-    if (!isAdmin) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-  }
-}
-
-export const config = {
-  matcher: '/admin/:path*',
-};
-```
+Admin pages are protected by **Clerk** authentication. To grant admin access:
+1. Go to [Clerk Dashboard](https://dashboard.clerk.com) → Users → Select your user
+2. Edit **Public metadata** and add: `{"role": "admin"}`
+3. Save. You can now access `/admin/*` routes.
 
 ## 📚 Full Documentation
 

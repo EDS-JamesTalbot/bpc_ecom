@@ -38,7 +38,7 @@ This guide covers three major enhancements to the website template:
 
 #### Step 2: Add Environment Variables
 
-Add to `websitetemplate/.env`:
+Add to `.env`:
 
 ```bash
 # Cloudinary Configuration
@@ -54,7 +54,7 @@ CLOUDINARY_API_SECRET=abcdefghijklmnopqrstuvwxyz
 #### Step 3: Install Package
 
 ```powershell
-cd websitetemplate
+cd BPC_Ecom
 npm install cloudinary
 ```
 
@@ -124,7 +124,7 @@ https://res.cloudinary.com/your-cloud-name/image/upload/
 #### Step 1: Install Dependencies
 
 ```powershell
-cd websitetemplate
+cd BPC_Ecom
 npm install --save-dev vitest @vitest/ui @testing-library/react @testing-library/jest-dom happy-dom
 npm install --save-dev playwright @playwright/test
 npx playwright install
@@ -138,7 +138,7 @@ npx playwright install
 #### Step 3: Test Structure
 
 ```
-websitetemplate/
+BPC_Ecom/
 ├── __tests__/
 │   ├── unit/           # Unit tests (components, utilities)
 │   ├── integration/    # Integration tests (actions, API routes)
@@ -246,7 +246,7 @@ git init
 git add .
 git commit -m "Initial commit with enhancements"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git remote add origin https://github.com/EDS-JamesTalbot/BPC_Ecom.git
 git push -u origin main
 ```
 
@@ -258,7 +258,7 @@ git push -u origin main
 4. Select your repository
 5. Configure:
    - **Framework Preset**: Next.js
-   - **Root Directory**: `websitetemplate`
+   - **Root Directory**: `.` (project root)
    - **Build Command**: `npm run build`
    - **Output Directory**: `.next`
 6. Add **Environment Variables** (copy from your `.env`)

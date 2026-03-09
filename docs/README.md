@@ -1,6 +1,6 @@
 # E-Commerce Website Template
 
-A modern, full-featured e-commerce website template built with **Next.js 15**, **Stripe Payments**, **Drizzle ORM**, and **shadcn/ui**. Perfect for small businesses selling physical products online.
+A modern, full-featured e-commerce website template built with **Next.js 16**, **Stripe/BPC Payments**, **Drizzle ORM**, **Clerk**, and **shadcn/ui**. Perfect for small businesses selling physical products online. Supports multi-tenant deployments and customer account registration.
 
 > **Note:** This is a generic template. Replace all placeholder text, images, and branding with your own content before deploying to production.
 
@@ -9,25 +9,28 @@ A modern, full-featured e-commerce website template built with **Next.js 15**, *
 ### 🛍️ E-Commerce Functionality
 - **Product Catalog** - Display products with images, descriptions, and prices
 - **Shopping Cart** - Add/remove items, adjust quantities, view totals
-- **Secure Checkout** - Two-step checkout with customer info and payment
-- **Stripe Integration** - Accept credit card payments securely
+- **Secure Checkout** - Two-step checkout with customer info and payment (Stripe/BPC)
+- **Customer Accounts** - Registration, login, order history, saved addresses
 - **Order Management** - Track orders in PostgreSQL database
 - **Email Notifications** - Automated order confirmations via Resend
 
 ### 🎨 User Interface
 - **Responsive Design** - Mobile-first, works on all devices
 - **Modern UI Components** - Built with shadcn/ui and Tailwind CSS
-- **Image Upload** - Admin can upload product images (with cropping)
-- **Admin Panel** - Manage products (add, edit, delete, toggle active status)
+- **Universal Image Upload** - URL, Cloudinary CDN, server upload, or base64 embed
+- **Admin CMS** - Manage products, page sections, testimonials, site settings, theme
+- **Admin Panel** - Clerk-protected; sales dashboard with charts
 - **Cart Sidebar** - Slide-out cart with live updates
 
 ### 🔧 Technical Features
-- **Next.js 15** - App Router, Server Components, Server Actions
+- **Next.js 16** - App Router, Server Components, Server Actions
 - **TypeScript** - Fully typed for better developer experience
 - **Drizzle ORM** - Type-safe database queries
 - **Neon PostgreSQL** - Serverless Postgres database
-- **Stripe Payments** - Payment Intent API with automatic payment methods
+- **Clerk** - Admin authentication
+- **Stripe/BPC** - Payment processing
 - **Resend** - Transactional email service
+- **Cloudinary** - Optional CDN for images
 - **Zod Validation** - Runtime type checking and validation
 
 ## 🚀 Quick Start
@@ -35,8 +38,8 @@ A modern, full-featured e-commerce website template built with **Next.js 15**, *
 ### 1. Clone and Install
 
 ```bash
-git clone <your-repo-url>
-cd websitetemplate
+git clone https://github.com/EDS-JamesTalbot/BPC_Ecom.git
+cd BPC_Ecom
 npm install
 ```
 
@@ -55,7 +58,11 @@ Create a `.env.local` file in the root directory:
 # Database (Neon PostgreSQL)
 DATABASE_URL=postgresql://...
 
-# Stripe
+# Clerk (Admin authentication)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# Stripe (optional - for Stripe payments)
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 
@@ -95,47 +102,36 @@ Visit `http://localhost:3000` to see your site!
 ## 📁 Project Structure
 
 ```
-websitetemplate/
+BPC_Ecom/
 ├── app/
 │   ├── actions/              # Server Actions
-│   │   ├── checkout-actions.ts   # Stripe payment processing
-│   │   ├── product-actions.ts    # Product CRUD operations
-│   │   └── admin-actions.ts      # Admin authentication
-│   ├── components/           # React Components
-│   │   ├── CartButton.tsx        # Shopping cart button
-│   │   ├── CartContext.tsx       # Cart state management
-│   │   ├── CartView.tsx          # Cart sidebar
-│   │   ├── CheckoutDialog.tsx    # Checkout modal
-│   │   ├── CheckoutForm.tsx      # Customer info form
-│   │   ├── PaymentForm.tsx       # Stripe payment form
-│   │   ├── Navigation.tsx        # Header navigation
-│   │   ├── AdminButton.tsx       # Admin mode toggle
-│   │   └── ImageCropper.tsx      # Image upload with cropping
-│   ├── shop/                 # Shop page
-│   │   ├── page.tsx              # Server Component
-│   │   └── ShopContent.tsx       # Client Component
-│   ├── contact/              # Contact page
-│   ├── testimonials/         # Testimonials page
-│   ├── order-confirmation/   # Order success page
-│   ├── payment-failed/       # Payment failure page
-│   ├── layout.tsx            # Root layout
-│   ├── page.tsx              # Homepage
-│   └── globals.css           # Global styles
-├── components/ui/            # shadcn/ui components
+│   │   ├── checkout-actions.ts       # Payment processing (Stripe/BPC)
+│   │   ├── product-actions.ts       # Product CRUD operations
+│   │   ├── content-actions.ts       # CMS content management
+│   │   ├── customer-auth-actions.ts # Customer registration/login
+│   │   └── customer-profile-actions.ts
+│   ├── admin/                # Admin CMS (Clerk-protected)
+│   │   ├── content/          # Page sections, testimonials, site settings
+│   │   ├── content/theme-editor/
+│   │   └── sales/            # Sales dashboard
+│   ├── components/          # React Components
+│   │   ├── CartButton.tsx, CartContext.tsx, CartView.tsx
+│   │   ├── CheckoutDialog.tsx, CheckoutForm.tsx, PaymentForm.tsx
+│   │   ├── UniversalImageUploader.tsx, ImageCropper.tsx
+│   │   ├── TenantProvider.tsx, MaintenanceGate.tsx
+│   │   └── Navigation.tsx, AdminButton.tsx
+│   ├── shop/, contact/, testimonials/
+│   ├── my-account/, customer-login/  # Customer account pages
+│   ├── order-confirmation/, payment-failed/
+│   ├── api/                 # API routes (upload, webhooks, etc.)
+│   ├── layout.tsx, page.tsx, globals.css
 ├── src/db/
-│   ├── schema.ts             # Database schema (Drizzle)
-│   ├── index.ts              # Database connection
-│   ├── seed.ts               # Sample data seeder
-│   └── queries/              # Database query helpers
-│       ├── products.ts           # Product queries
-│       └── orders.ts             # Order queries
-├── lib/
-│   └── utils.ts              # Utility functions
-├── public/                   # Static assets
-├── drizzle.config.ts         # Drizzle configuration
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
+│   ├── schema.ts            # Multi-tenant schema (tenants, customers, products, orders, etc.)
+│   ├── seed.ts, seed-content.ts
+│   └── queries/             # products, orders, customers, page-sections, site-settings, tenants
+├── components/ui/           # shadcn/ui components
+├── lib/, public/, scripts/
+├── drizzle.config.ts, package.json, tsconfig.json
 └── next.config.ts
 ```
 
@@ -143,7 +139,7 @@ websitetemplate/
 
 ### Admin Mode
 
-Click the "Admin" button in the header to enter admin mode (password: `admin123`). In admin mode, you can:
+Admin access uses **Clerk** authentication. Set your user's Public metadata to `{"role": "admin"}` in the [Clerk Dashboard](https://dashboard.clerk.com). In admin mode, you can:
 
 - Add new products
 - Edit existing products (name, price, description, image)
@@ -180,6 +176,8 @@ Click the "Admin" button in the header to enter admin mode (password: `admin123`
    - Order saved in database
 
 ### Database Schema
+
+The schema supports **multi-tenant** deployments. Key tables include `tenants`, `tenant_config`, `customers`, `products`, `orders`, `order_items`, `testimonials`, `page_sections`, and `site_settings`.
 
 **Products Table:**
 - `id` - Auto-incrementing primary key
@@ -271,8 +269,11 @@ app/
 ## 📚 Documentation
 
 - [STRIPE_SETUP.md](./STRIPE_SETUP.md) - Stripe payment integration guide
+- [CLERK_SETUP_GUIDE.md](./CLERK_SETUP_GUIDE.md) - Clerk admin authentication
+- [ADMIN_CMS_SETUP_GUIDE.md](./ADMIN_CMS_SETUP_GUIDE.md) - Admin CMS (page sections, testimonials, site settings)
 - [CHECKOUT_SETUP.md](./CHECKOUT_SETUP.md) - Checkout flow documentation
-- [DATABASE_PERSISTENCE_IMPLEMENTATION.md](./DATABASE_PERSISTENCE_IMPLEMENTATION.md) - Database architecture
+- [MULTI_TENANT.md](./MULTI_TENANT.md) - Multi-tenant architecture
+- [CUSTOMER_REGISTRATION_IMPLEMENTATION.md](../CUSTOMER_REGISTRATION_IMPLEMENTATION.md) - Customer accounts & order history
 
 ## 🧪 Testing
 
@@ -304,9 +305,11 @@ Emails are sent via Resend. In development, check your Resend dashboard for sent
 Make sure to set these in your production environment:
 
 - `DATABASE_URL` - Production database URL
-- `STRIPE_SECRET_KEY` - Live Stripe secret key (starts with `sk_live_`)
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk publishable key
+- `CLERK_SECRET_KEY` - Clerk secret key
+- `STRIPE_SECRET_KEY` - Live Stripe secret key (if using Stripe)
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Live Stripe publishable key
-- `STRIPE_WEBHOOK_SECRET` - Webhook signing secret (if using webhooks)
+- `STRIPE_WEBHOOK_SECRET` - Webhook signing secret (if using Stripe webhooks)
 - `RESEND_API_KEY` - Resend API key
 - `EMAIL_FROM_ADDRESS` - Verified sender email
 - `BUSINESS_OWNER_EMAIL` - Where to receive order notifications
@@ -325,6 +328,7 @@ npm run db:migrate   # Run migrations
 npm run db:push      # Push schema to database
 npm run db:studio    # Open Drizzle Studio (database GUI)
 npm run db:seed      # Seed database with sample products
+npm run db:seed:content  # Seed page sections, testimonials, site settings
 ```
 
 ## 🤝 Contributing

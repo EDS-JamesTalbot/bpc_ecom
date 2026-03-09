@@ -44,7 +44,7 @@ export async function POST() {
 
     // Generate upload parameters
     const timestamp = Math.round(new Date().getTime() / 1000);
-    const folder = 'websitetemplate/products'; // Organize images in a folder
+    const folder = 'BPC_Ecom/products'; // Organize images in a folder
     
     const paramsToSign = {
       timestamp,

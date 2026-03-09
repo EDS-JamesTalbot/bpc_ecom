@@ -2,7 +2,7 @@
 
 ## 🎉 Summary
 
-Successfully implemented a **Universal Image Uploader** system that provides **4 flexible ways** to add images to your websitetemplate, with the ability to **browse your entire computer** (not limited to any specific folder).
+Successfully implemented a **Universal Image Uploader** system that provides **4 flexible ways** to add images to your e-commerce site, with the ability to **browse your entire computer** (not limited to any specific folder).
 
 ---
 
@@ -21,7 +21,7 @@ remotePatterns: [
 ```
 
 ### 2. **Created `/public/uploads` Directory** ✅
-- **Location:** `websitetemplate/public/uploads/`
+- **Location:** `public/uploads/`
 - **Purpose:** Store locally uploaded images
 - **Protected:** Added to `.gitignore` (user uploads won't be committed)
 

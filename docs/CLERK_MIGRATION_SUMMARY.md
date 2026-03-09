@@ -198,11 +198,11 @@ This is no longer used but won't cause errors if left in `.env`.
 
 2. **Add API Keys to `.env`**
    - Copy your Publishable Key and Secret Key
-   - Add them to `websitetemplate/.env`
+   - Add them to `.env`
 
 3. **Restart Dev Server**
    ```powershell
-   cd websitetemplate
+   cd BPC_Ecom
    npm run dev
    ```
 

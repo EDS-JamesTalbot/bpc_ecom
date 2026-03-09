@@ -102,7 +102,7 @@ export const EMAIL_CONFIG = {
 ### RECOMMENDED: Run Tests
 
 ```bash
-cd websitetemplate
+cd BPC_Ecom
 npm test
 ```
 

@@ -145,7 +145,7 @@ git push origin main
 ## 📂 Project Structure
 
 ```
-websitetemplate/
+BPC_Ecom/
 ├── lib/
 │   ├── cloudinary.ts              # NEW: Cloudinary server config
 │   └── env.ts                     # UPDATED: Added Cloudinary vars

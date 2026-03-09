@@ -33,7 +33,7 @@ In your Clerk Dashboard:
 
 ### Step 3: Update Your `.env` File
 
-Add these variables to your `websitetemplate/.env` file:
+Add these variables to your `.env` file:
 
 ```bash
 # Clerk Authentication

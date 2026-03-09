@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document details the database separation between the `loveysoap` production project and the `websitetemplate` development project. Previously, both projects shared the same Neon database, causing test orders to mix with production data.
+This document details the database separation between the `loveysoap` production project and the `ecom_site_BPC` development project. Previously, both projects shared the same Neon database, causing test orders to mix with production data.
 
 ## Date of Separation
 **December 6, 2025**
@@ -18,10 +18,10 @@ This document details the database separation between the `loveysoap` production
 - **Purpose**: Live customer orders and product data
 - **Status**: ✅ Active & Clean (test data removed)
 
-### **websitetemplate (Development/Template)**
+### **ecom_site_BPC (Development/Template)**
 - **Project**: Development template for new e-commerce sites
 - **Database**: Neon project "website_template" (newly created)
-- **Connection**: Uses `DATABASE_URL` from `websitetemplate/.env`
+- **Connection**: Uses `DATABASE_URL` from `ecom_site_BPC/.env`
 - **Purpose**: Testing, development, and template demonstrations
 - **Status**: ✅ Active & Isolated (Seeded with 6 sample products)
 
@@ -29,13 +29,13 @@ This document details the database separation between the `loveysoap` production
 
 ## What Was Done
 
-### 1. Created New Database for websitetemplate
+### 1. Created New Database for ecom_site_BPC
 - Created a new Neon project named "website_template"
-- Updated `websitetemplate/.env` with the new `DATABASE_URL`
+- Updated `ecom_site_BPC/.env` with the new `DATABASE_URL`
 - Initialized the database schema using `npm run db:push`
 
 ### 2. Verified Database Isolation
-- Confirmed `websitetemplate` connects to its own database
+- Confirmed `ecom_site_BPC` connects to its own database
 - Verified all tables (products, orders, order_items) were created
 - Tested connection with verification script
 
@@ -76,7 +76,7 @@ DATABASE_URL=postgresql://[production-connection-string]
 # ... other production environment variables
 ```
 
-### websitetemplate/.env
+### ecom_site_BPC/.env
 ```bash
 DATABASE_URL=postgresql://neondb_owner:npg_pxh5oZ4weqkN@ep-patient-silence-a7kw67kk-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 # ... other development environment variables
@@ -96,9 +96,9 @@ npm run db:push
 npm run db:generate; npm run db:migrate
 ```
 
-### For websitetemplate (Development)
+### For ecom_site_BPC (Development)
 ```powershell
-cd C:\Users\JamesTalbot\.cursor\websitetemplate
+cd C:\Users\JamesTalbot\.cursor\ecom_site_BPC
 npm run db:push
 # or
 npm run db:generate; npm run db:migrate
@@ -118,9 +118,9 @@ npm run db:studio
 # Shows production database tables and data
 ```
 
-**websitetemplate:**
+**ecom_site_BPC:**
 ```powershell
-cd C:\Users\JamesTalbot\.cursor\websitetemplate
+cd C:\Users\JamesTalbot\.cursor\ecom_site_BPC
 npm run db:studio
 # Opens Drizzle Studio on http://localhost:4983
 # Shows template database tables and data (separate from production)
@@ -132,10 +132,10 @@ npm run db:studio
 
 ### ✅ DO:
 - Always verify which project directory you're in before running database commands
-- Use `websitetemplate` for all testing and development
+- Use `ecom_site_BPC` for all testing and development
 - Keep `loveysoap` for production use only
 - Regularly back up the production database via Neon dashboard
-- Test new features in `websitetemplate` before deploying to `loveysoap`
+- Test new features in `ecom_site_BPC` before deploying to `loveysoap`
 
 ### ❌ DON'T:
 - Don't create test orders in the `loveysoap` database
@@ -155,7 +155,7 @@ npm run db:studio
 ### After Cleanup:
 - Total orders: 12 (all real production orders)
 - Clean production data only
-- Test data isolated to websitetemplate database
+- Test data isolated to ecom_site_BPC database
 
 ---
 
@@ -166,7 +166,7 @@ npm run db:studio
 - Select project: "LoveySoap"
 - View: Tables, backups, connection strings
 
-### websitetemplate (Development Database)
+### ecom_site_BPC (Development Database)
 - Navigate to: https://console.neon.tech/
 - Select project: "website_template"
 - View: Tables, backups, connection strings
@@ -187,7 +187,7 @@ npm run db:studio
 ### Schema mismatch errors
 **Solution**: Run `npm run db:push` to sync the schema with your database.
 
-### Need to reset websitetemplate database
+### Need to reset ecom_site_BPC database
 **Solution**: 
 1. Delete all data via Neon dashboard
 2. Run `npm run db:push` to recreate tables
@@ -210,15 +210,15 @@ These scripts can be modified and reused if needed for future cleanups.
 ## Summary
 
 ✅ **Completed:**
-1. Created separate database for `websitetemplate`
-2. Initialized database schema for `websitetemplate`
+1. Created separate database for `ecom_site_BPC`
+2. Initialized database schema for `ecom_site_BPC`
 3. Identified 17 test orders in `loveysoap` production database
 4. Cleaned up test orders and 21 associated order items
 5. Verified both databases are working correctly and isolated
 
 ✅ **Result:**
 - `loveysoap`: Clean production database with 12 real orders
-- `websitetemplate`: Isolated development database for testing
+- `ecom_site_BPC`: Isolated development database for testing
 - No more data mixing between projects
 
 ---

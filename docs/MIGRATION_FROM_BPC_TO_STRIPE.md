@@ -87,7 +87,7 @@ updateOrderPaymentStatus() // Now sets paymentGateway to 'stripe'
 ```json
 {
   "name": "loveysoap"  // Before
-  "name": "websitetemplate"  // After
+  "name": "ecom_site_BPC"  // After
 }
 ```
 
