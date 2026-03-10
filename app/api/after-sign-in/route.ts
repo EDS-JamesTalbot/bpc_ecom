@@ -7,12 +7,14 @@
  */
 
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 const COOKIE_NAME = 'redirect_after_signin';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const redirectPath = request.cookies.get(COOKIE_NAME)?.value;
+  const cookieStore = await cookies();
+  const redirectPath = cookieStore.get(COOKIE_NAME)?.value;
 
   const response = redirectPath && redirectPath.startsWith('/') && !redirectPath.startsWith('//')
     ? NextResponse.redirect(new URL(redirectPath, url.origin))
