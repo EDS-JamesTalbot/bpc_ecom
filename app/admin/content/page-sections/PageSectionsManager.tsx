@@ -29,6 +29,7 @@ import {
 } from '@/app/actions/content-actions';
 import type { PageSection } from '@/src/db/schema';
 import { Trash2, Plus } from 'lucide-react';
+import { HomePageBannersCard } from './HomePageBannersCard';
 
 interface PageSectionsManagerProps {
   initialPageSections: PageSection[];
@@ -149,6 +150,72 @@ export function PageSectionsManager({ initialPageSections }: PageSectionsManager
     setIsCreating(false);
   }
 
+  const SECTION_DEFAULTS: Record<string, { title: string; content: Record<string, unknown> }> = {
+    home_cta: {
+      title: 'Home - Call to Action',
+      content: {
+        heading: "Experience the Difference Yourself",
+        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+        buttonText: "Shop Now",
+        buttonLink: "/shop"
+      }
+    },
+    home_favorite_products: {
+      title: 'Home - Customer Favorite Products',
+      content: {
+        heading: "Customer Favorite Products",
+        products: [
+          { title: "Product One", quote: "Lorem ipsum...", description: "Description here" },
+          { title: "Product Two", quote: "Quote here", description: "Description here" },
+          { title: "Product Three", quote: "Quote here", description: "Description here" }
+        ]
+      }
+    },
+    home_why_choose: {
+      title: 'Home - Why Choose Us',
+      content: {
+        heading: "Why Customers Choose Us",
+        features: [
+          { icon: "🌿", title: "Feature One", description: "Description here" },
+          { icon: "✨", title: "Feature Two", description: "Description here" },
+          { icon: "💙", title: "Feature Three", description: "Description here" }
+        ]
+      }
+    }
+  };
+
+  function handleCreateForSection(sectionKey: string) {
+    const defaults = SECTION_DEFAULTS[sectionKey];
+    if (defaults) {
+      setFormData({
+        sectionKey,
+        page: 'home',
+        title: defaults.title,
+        isActive: true,
+      });
+      setContentFields(
+        Object.entries(defaults.content).map(([key, value]) => ({
+          key,
+          value: typeof value === 'string'
+            ? value
+            : Array.isArray(value)
+              ? value.map((item) => JSON.stringify(item)).join('\n')
+              : JSON.stringify(value)
+        }))
+      );
+    } else {
+      setFormData({
+        sectionKey,
+        page: 'home',
+        title: sectionKey.replace(/_/g, ' '),
+        isActive: true,
+      });
+      setContentFields([{ key: '', value: '' }]);
+    }
+    setIsCreating(true);
+    setEditingId(null);
+  }
+
   function addContentField() {
     setContentFields([...contentFields, { key: '', value: '' }]);
   }
@@ -241,6 +308,14 @@ export function PageSectionsManager({ initialPageSections }: PageSectionsManager
 
   return (
     <div className="space-y-8">
+      {/* Home Page Banners - quick access */}
+      {!isCreating && !editingId && (
+        <HomePageBannersCard
+          pageSections={pageSections}
+          onEdit={handleEdit}
+          onCreate={handleCreateForSection}
+        />
+      )}
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
