@@ -36,7 +36,7 @@ async function OrderConfirmationContent({
   // Verify-on-return: if order is still pending and we have a BPC session, check session status
   // (allows payment to be confirmed without webhooks, e.g. when testing on localhost)
   if (order.paymentStatus === 'pending' && order.gatewayPaymentId) {
-    const session = await getSession(order.gatewayPaymentId);
+    const session = await getSession(order.gatewayPaymentId, order.tenantId);
     if (session?.paymentStatus === 'paid') {
       await updateOrderPaymentStatus(orderId, {
         paymentStatus: 'paid',

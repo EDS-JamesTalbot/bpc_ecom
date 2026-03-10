@@ -24,6 +24,7 @@ CREATE INDEX IF NOT EXISTS "tenants_slug_idx" ON "tenants" USING btree ("slug");
 CREATE TABLE IF NOT EXISTS "tenant_config" (
   "id" serial PRIMARY KEY NOT NULL,
   "tenant_id" uuid NOT NULL,
+  "tenant_name" varchar(255),
   "config_key" varchar(100) NOT NULL,
   "config_value" text NOT NULL
 );

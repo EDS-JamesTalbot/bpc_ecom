@@ -1,31 +1,50 @@
 /**
  * Cloudinary Server-Side Configuration
- * 
- * This file handles server-side Cloudinary operations like:
- * - Generating signed upload URLs
- * - Image transformations
- * - Secure API calls
+ *
+ * Supports tenant-specific config via tenant_config table.
+ * Keys: cloudinary_cloud_name, cloudinary_api_key, cloudinary_api_secret
+ * Falls back to env vars when not set per tenant.
  */
 
 import { v2 as cloudinary } from 'cloudinary';
+import { getTenantConfigByKeys } from '@/src/db/queries/tenant-config';
 
-// Configure Cloudinary with environment variables
+// Default config (env vars)
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+export type CloudinaryConfig = {
+  cloudName: string;
+  apiKey: string;
+  apiSecret: string;
+};
+
 /**
- * Generate a signature for secure uploads
- * This prevents unauthorized uploads to your Cloudinary account
+ * Get Cloudinary config for a tenant. Falls back to env vars.
  */
-export function generateSignature(paramsToSign: Record<string, string | number>) {
-  const signature = cloudinary.utils.api_sign_request(
-    paramsToSign,
-    process.env.CLOUDINARY_API_SECRET || ''
-  );
-  return signature;
+export async function getCloudinaryConfig(tenantId?: string): Promise<CloudinaryConfig> {
+  const keys = ['cloudinary_cloud_name', 'cloudinary_api_key', 'cloudinary_api_secret'];
+  const tc = tenantId ? await getTenantConfigByKeys(keys, tenantId) : {};
+  return {
+    cloudName: tc.cloudinary_cloud_name ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? '',
+    apiKey: tc.cloudinary_api_key ?? process.env.CLOUDINARY_API_KEY ?? '',
+    apiSecret: tc.cloudinary_api_secret ?? process.env.CLOUDINARY_API_SECRET ?? '',
+  };
+}
+
+/**
+ * Generate a signature for secure uploads.
+ * Pass tenantId for tenant-specific Cloudinary; omit for global config.
+ */
+export async function generateSignature(
+  paramsToSign: Record<string, string | number>,
+  tenantId?: string
+): Promise<string> {
+  const config = await getCloudinaryConfig(tenantId);
+  return cloudinary.utils.api_sign_request(paramsToSign, config.apiSecret);
 }
 
 /**

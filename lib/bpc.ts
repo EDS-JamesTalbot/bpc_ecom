@@ -1,7 +1,12 @@
 /**
  * BPC Payment Gateway API client (eCommerce API v2 - Redirect integration)
  * Docs: https://dev.bpcbt.com/en/integration/apiv2/structure/redirect-integration-apiv2.html
+ *
+ * Config resolution: tenant_config (DB) overrides env vars. Use tenant_config for
+ * per-tenant BPC_API_KEY, BPC_GATEWAY_URL, BPC_CURRENCY. Keys: bpc_api_key, bpc_gateway_url, bpc_currency.
  */
+
+import { getTenantConfigByKeys } from '@/src/db/queries/tenant-config';
 
 const BPC_API_VERSION = '2023-10-31';
 
@@ -26,12 +31,13 @@ export type BpcSession = {
   created?: string;
 };
 
-function getConfig() {
-  const baseUrl = process.env.BPC_GATEWAY_URL?.replace(/\/$/, '') || 'https://dev.bpcbt.com/api2';
-  const apiKey = process.env.BPC_API_KEY || '';
-  // Sandbox (dev.bpcbt.com) only supports EUR - see https://dev.bpcbt.com/
+async function getConfig(tenantId?: string) {
+  const keys = ['bpc_api_key', 'bpc_gateway_url', 'bpc_currency'];
+  const tenantConfig = tenantId ? await getTenantConfigByKeys(keys, tenantId) : {};
+  const baseUrl = (tenantConfig.bpc_gateway_url ?? process.env.BPC_GATEWAY_URL)?.replace(/\/$/, '') || 'https://dev.bpcbt.com/api2';
+  const apiKey = tenantConfig.bpc_api_key ?? process.env.BPC_API_KEY ?? '';
   const isSandbox = baseUrl.includes('dev.bpcbt.com');
-  const currency = process.env.BPC_CURRENCY || (isSandbox ? 'EUR' : undefined);
+  const currency = tenantConfig.bpc_currency ?? process.env.BPC_CURRENCY ?? (isSandbox ? 'EUR' : undefined);
   return { baseUrl, apiKey, currency, isSandbox };
 }
 
@@ -42,9 +48,10 @@ export type CreateSessionResult =
 /**
  * Create a BPC payment session for redirect flow.
  * Returns session id and paymentUrl to redirect the customer.
+ * Pass tenantId to use tenant-specific BPC config from tenant_config table.
  */
-export async function createSession(params: CreateSessionParams): Promise<CreateSessionResult> {
-  const { baseUrl, apiKey, currency: configCurrency, isSandbox } = getConfig();
+export async function createSession(params: CreateSessionParams, tenantId?: string): Promise<CreateSessionResult> {
+  const { baseUrl, apiKey, currency: configCurrency, isSandbox } = await getConfig(tenantId);
   if (!apiKey) {
     console.error('BPC_API_KEY is not set');
     return { success: false, error: 'BPC_API_KEY is not configured. Please add it to your .env file.' };
@@ -106,9 +113,10 @@ export async function createSession(params: CreateSessionParams): Promise<Create
 /**
  * Get a session by ID (for verify-on-return when webhooks are not available, e.g. localhost).
  * Returns the session object including paymentStatus.
+ * Pass tenantId to use tenant-specific BPC config from tenant_config table.
  */
-export async function getSession(sessionId: string): Promise<BpcSession | null> {
-  const { baseUrl, apiKey } = getConfig();
+export async function getSession(sessionId: string, tenantId?: string): Promise<BpcSession | null> {
+  const { baseUrl, apiKey } = await getConfig(tenantId);
   if (!apiKey) return null;
 
   const res = await fetch(`${baseUrl}/sessions/${sessionId}`, {

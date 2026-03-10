@@ -10,14 +10,12 @@ import { Resend } from 'resend';
 import { PAYMENT } from '@/lib/constants';
 import { setCheckoutPending } from '@/lib/checkout-pending';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { getTenantEmailConfig } from '@/lib/tenant-email-config';
 import {
   generateOrderCreatedEmail,
   type OrderEmailData,
 } from '@/lib/email-templates';
 import bcrypt from 'bcryptjs';
-
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Rate limiter: Allow 3 checkout attempts per 5 minutes per IP
 const checkoutLimiter = rateLimit({
@@ -124,13 +122,15 @@ export async function processCheckout(input: CheckoutInput) {
       throw new Error('Failed to create order in database');
     }
 
-    // Order-created email to business
+    // Order-created email to business (tenant-specific config)
     try {
-      const fromEmail = process.env.EMAIL_FROM_ADDRESS
-        ? `${process.env.EMAIL_FROM_NAME || 'Your Store'} <${process.env.EMAIL_FROM_ADDRESS}>`
+      const emailConfig = await getTenantEmailConfig(order.tenantId);
+      const resend = new Resend(emailConfig.resendApiKey);
+      const fromEmail = emailConfig.fromAddress
+        ? `${emailConfig.fromName} <${emailConfig.fromAddress}>`
         : 'Your Store Orders <onboarding@resend.dev>';
-      const businessEmail = process.env.BUSINESS_OWNER_EMAIL;
-      if (businessEmail) {
+      const businessEmail = emailConfig.businessOwnerEmail;
+      if (businessEmail && emailConfig.resendApiKey) {
         const emailData: OrderEmailData = {
           orderId: order.id,
           fullName: validated.fullName,
@@ -166,13 +166,16 @@ export async function processCheckout(input: CheckoutInput) {
       return `${protocol}://${host}`;
     })();
 
-    const sessionResult = await createSession({
-      amount: Math.round(validated.totalAmount * PAYMENT.CENTS_PER_DOLLAR),
-      currency: PAYMENT.CURRENCY,
-      successUrl: `${baseUrl}/order-confirmation?orderId=${order.id}`,
-      failureUrl: `${baseUrl}/payment-failed?orderId=${order.id}`,
-      merchantReferenceId: order.id.toString(),
-    });
+    const sessionResult = await createSession(
+      {
+        amount: Math.round(validated.totalAmount * PAYMENT.CENTS_PER_DOLLAR),
+        currency: PAYMENT.CURRENCY,
+        successUrl: `${baseUrl}/order-confirmation?orderId=${order.id}`,
+        failureUrl: `${baseUrl}/payment-failed?orderId=${order.id}`,
+        merchantReferenceId: order.id.toString(),
+      },
+      order.tenantId
+    );
 
     if (!sessionResult.success) {
       return {

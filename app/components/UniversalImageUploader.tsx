@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Upload, X, Loader2, Link as LinkIcon, Cloud, Database, HardDrive, FolderSearch } from 'lucide-react';
+import { useTenantSlug } from '@/app/hooks/useTenantSlug';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,7 @@ export function UniversalImageUploader({
   onChange, 
   label = "Product Image" 
 }: UniversalImageUploaderProps) {
+  const tenantSlug = useTenantSlug();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [manualUrl, setManualUrl] = useState('');
@@ -57,9 +59,12 @@ export function UniversalImageUploader({
     setUploadError(null);
 
     try {
-      // Get signed upload parameters
+      // Get signed upload parameters (pass tenant for tenant-specific Cloudinary)
+      const headers: Record<string, string> = {};
+      if (tenantSlug) headers['X-Tenant-Slug'] = tenantSlug;
       const signResponse = await fetch('/api/upload', {
         method: 'POST',
+        headers,
       });
 
       if (!signResponse.ok) {
@@ -214,7 +219,9 @@ export function UniversalImageUploader({
     setUploadError(null);
     
     try {
-      const response = await fetch('/api/cloudinary-images');
+      const headers: Record<string, string> = {};
+      if (tenantSlug) headers['X-Tenant-Slug'] = tenantSlug;
+      const response = await fetch('/api/cloudinary-images', { headers });
       if (!response.ok) {
         throw new Error('Failed to fetch images');
       }

@@ -18,10 +18,12 @@ export const tenantsTable = pgTable('tenants', {
 /**
  * TENANT CONFIG TABLE
  * Per-tenant secrets (BPC keys, Cloudinary, etc.)
+ * tenant_name is denormalized for ease of viewing in DB tools (joins not needed).
  */
 export const tenantConfigTable = pgTable('tenant_config', {
   id: serial('id').primaryKey(),
   tenantId: uuid('tenant_id').notNull().references(() => tenantsTable.id, { onDelete: 'cascade' }),
+  tenantName: varchar('tenant_name', { length: 255 }),
   configKey: varchar('config_key', { length: 100 }).notNull(),
   configValue: text('config_value').notNull(),
 }, (table) => ({

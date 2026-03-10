@@ -18,6 +18,8 @@
     "db:seed:branding": "tsx scripts/seed-branding.ts",
     "db:seed:theme": "tsx scripts/seed-theme.ts",
     "db:migrate:multi-tenant": "tsx scripts/migrate-multi-tenant.ts",
+    "db:migrate:tenant-config-name": "tsx scripts/add-tenant-config-name.ts",
+    "db:copy-content": "tsx scripts/copy-content-to-tenant.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

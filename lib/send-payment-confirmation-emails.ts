@@ -1,26 +1,28 @@
 /**
  * Sends payment confirmation emails (business + customer) after an order is marked paid.
  * Used by both the BPC webhook and the order-confirmation page (verify-on-return).
+ * Uses tenant-specific email config when available.
  */
 import { Resend } from 'resend';
 import { getOrderWithItems } from '@/src/db/queries/orders';
+import { getTenantEmailConfig } from '@/lib/tenant-email-config';
 import {
   generatePaymentConfirmedBusinessEmail,
   generatePaymentConfirmedCustomerEmail,
   type OrderEmailData,
 } from '@/lib/email-templates';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function sendPaymentConfirmationEmails(orderId: number): Promise<void> {
   try {
     const fullOrder = await getOrderWithItems(orderId);
     if (!fullOrder) return;
 
-    const fromEmail = process.env.EMAIL_FROM_ADDRESS
-      ? `${process.env.EMAIL_FROM_NAME || 'Your Store'} <${process.env.EMAIL_FROM_ADDRESS}>`
+    const emailConfig = await getTenantEmailConfig(fullOrder.tenantId);
+    const resend = new Resend(emailConfig.resendApiKey);
+    const fromEmail = emailConfig.fromAddress
+      ? `${emailConfig.fromName} <${emailConfig.fromAddress}>`
       : 'Your Store Orders <onboarding@resend.dev>';
-    const businessEmail = process.env.BUSINESS_OWNER_EMAIL;
+    const businessEmail = emailConfig.businessOwnerEmail;
 
     const businessEmailData: OrderEmailData = {
       orderId,
@@ -35,7 +37,7 @@ export async function sendPaymentConfirmationEmails(orderId: number): Promise<vo
       cardLast4: '****',
     };
 
-    if (businessEmail) {
+    if (businessEmail && emailConfig.resendApiKey) {
       await resend.emails.send({
         from: fromEmail,
         to: businessEmail,
@@ -44,7 +46,7 @@ export async function sendPaymentConfirmationEmails(orderId: number): Promise<vo
       });
     }
 
-    if (fullOrder.email) {
+    if (fullOrder.email && emailConfig.resendApiKey) {
       const customerEmailData: OrderEmailData = {
         ...businessEmailData,
         items: fullOrder.items,

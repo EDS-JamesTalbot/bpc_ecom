@@ -67,10 +67,26 @@ export async function getTenantFromHeaders(
 /**
  * Get tenant ID for the current request (cached per-request).
  * Use in Server Components and Server Actions.
- * Super-admins can override via cookie (super_admin_tenant_id).
- * Falls back to default tenant when not in request context (e.g. seed scripts).
+ * Order: path-based (x-tenant-slug) > super-admin cookie > headers (domain/subdomain) > default.
+ * Super-admin cookie is ignored when path explicitly has a tenant (e.g. /loveys-soap/...).
  */
 export const getTenantIdForRequest = cache(async (): Promise<string> => {
+  try {
+    const headersList = await headers();
+    // Path-based tenant takes precedence - when user visits /loveys-soap/..., always use that tenant
+    const pathSlug = headersList.get('x-tenant-slug');
+    if (pathSlug) {
+      const bySlug = await getTenantBySlug(pathSlug);
+      if (bySlug) return bySlug.id;
+      throw new Error('TENANT_NOT_FOUND');
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === 'TENANT_NOT_FOUND') {
+      throw err;
+    }
+    // Not in request context (e.g. seed script, cron)
+  }
+
   try {
     const { userId } = await auth();
     if (userId) {
@@ -99,9 +115,8 @@ export const getTenantIdForRequest = cache(async (): Promise<string> => {
     if (id) return id;
   } catch (err) {
     if (err instanceof Error && err.message === 'TENANT_NOT_FOUND') {
-      throw err; // Re-throw so layout can call notFound()
+      throw err;
     }
-    // Not in request context (e.g. seed script, cron)
   }
   const defaultTenant = await getDefaultTenant();
   if (!defaultTenant) {

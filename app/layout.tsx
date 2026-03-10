@@ -16,8 +16,12 @@ import { MaintenanceGate } from "./components/MaintenanceGate";
 import { getSiteSettingByKey, getSiteSettingsByCategory } from "@/src/db/queries/site-settings";
 import { setAdminActive, isAdminActive, clearAdminActive } from "@/lib/admin-session";
 import { getTenantIdForRequest, getTenantSlugForRequest } from "@/lib/tenant-context";
+import { getTenantById } from "@/src/db/queries/tenants";
 import { TenantProvider } from "./components/TenantProvider";
 import { redirect, notFound } from "next/navigation";
+
+/* Force dynamic so metadata (browser tab title) updates per tenant */
+export const dynamic = 'force-dynamic';
 
 /* FONT SETUP */
 const geistSans = Geist({
@@ -29,11 +33,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-/* META */
-export const metadata: Metadata = {
-  title: "E-Commerce Template",
-  description: "Modern e-commerce website template with Next.js and BPC Payment Gateway.",
-};
+/* META - dynamic per tenant */
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const tenantId = await getTenantIdForRequest();
+    const storeNameSetting = await getSiteSettingByKey('store_name', tenantId);
+    const storeName = storeNameSetting?.settingValue;
+    const tenant = await getTenantById(tenantId);
+    const title = storeName || tenant?.name || "E-Commerce Template";
+    return {
+      title,
+      description: "Modern e-commerce website template with Next.js and BPC Payment Gateway.",
+    };
+  } catch {
+    return {
+      title: "E-Commerce Template",
+      description: "Modern e-commerce website template with Next.js and BPC Payment Gateway.",
+    };
+  }
+}
 
 export default async function RootLayout({
   children,

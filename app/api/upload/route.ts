@@ -1,66 +1,52 @@
 /**
  * Cloudinary Upload API Route (Secured with Clerk Authentication)
- * 
- * Generates a signed upload URL for secure image uploads
- * Requires admin authentication
+ *
+ * Generates a signed upload URL for secure image uploads.
+ * Requires admin authentication.
+ * Pass X-Tenant-Slug header for tenant-specific Cloudinary config.
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { generateSignature } from '@/lib/cloudinary';
+import { generateSignature, getCloudinaryConfig } from '@/lib/cloudinary';
+import { getTenantBySlug } from '@/src/db/queries/tenants';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
-    // Verify admin authentication
     const { userId } = await auth();
-    
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized: You must be signed in' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized: You must be signed in' }, { status: 401 });
     }
-    
-    // Verify admin role
+
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
-    
     if (user.publicMetadata?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
-    
-    // Check if Cloudinary credentials are configured
-    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 
-        !process.env.CLOUDINARY_API_KEY || 
-        !process.env.CLOUDINARY_API_SECRET) {
+
+    const tenantSlug = request.headers.get('x-tenant-slug');
+    const tenant = tenantSlug ? await getTenantBySlug(tenantSlug) : null;
+    const tenantId = tenant?.id;
+
+    const config = await getCloudinaryConfig(tenantId);
+    if (!config.cloudName || !config.apiKey || !config.apiSecret) {
       return NextResponse.json(
-        { error: 'Cloudinary credentials not configured. Add them to your .env file.' },
+        { error: 'Cloudinary credentials not configured. Add them to .env or tenant_config.' },
         { status: 500 }
       );
     }
 
-    // Generate upload parameters
     const timestamp = Math.round(new Date().getTime() / 1000);
-    const folder = 'BPC_Ecom/products'; // Organize images in a folder
-    
-    const paramsToSign = {
-      timestamp,
-      folder,
-    };
-    
-    // Generate signature
-    const signature = generateSignature(paramsToSign);
-    
-    // Return signed parameters
+    const folder = tenantSlug ? `${tenantSlug}/products` : 'BPC_Ecom/products';
+    const paramsToSign = { timestamp, folder };
+    const signature = await generateSignature(paramsToSign, tenantId);
+
     return NextResponse.json({
       signature,
       timestamp,
       folder,
-      cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-      apiKey: process.env.CLOUDINARY_API_KEY,
+      cloudName: config.cloudName,
+      apiKey: config.apiKey,
     });
   } catch (error) {
     console.error('Upload signature generation error:', error);

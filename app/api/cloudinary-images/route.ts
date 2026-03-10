@@ -1,51 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { v2 as cloudinary } from 'cloudinary';
-
-// Configure Cloudinary - DO NOT use hardcoded fallbacks
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { getCloudinaryConfig } from '@/lib/cloudinary';
+import { getTenantBySlug } from '@/src/db/queries/tenants';
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin authentication
     const { userId } = await auth();
-    
     if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized: You must be signed in' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized: You must be signed in' }, { status: 401 });
     }
-    
-    // Verify admin role
+
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
-    
     if (user.publicMetadata?.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Forbidden: Admin access required' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
-    
-    // Verify Cloudinary credentials are configured
-    if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 
-        !process.env.CLOUDINARY_API_KEY || 
-        !process.env.CLOUDINARY_API_SECRET) {
+
+    const tenantSlug = request.headers.get('x-tenant-slug');
+    const tenant = tenantSlug ? await getTenantBySlug(tenantSlug) : null;
+    const config = await getCloudinaryConfig(tenant?.id);
+
+    if (!config.cloudName || !config.apiKey || !config.apiSecret) {
       return NextResponse.json(
-        { error: 'Cloudinary credentials not configured. Add them to your .env file.' },
+        { error: 'Cloudinary credentials not configured. Add them to .env or tenant_config.' },
         { status: 500 }
       );
     }
-    
+
+    cloudinary.config({
+      cloud_name: config.cloudName,
+      api_key: config.apiKey,
+      api_secret: config.apiSecret,
+    });
+
     const searchParams = request.nextUrl.searchParams;
     const nextCursor = searchParams.get('next_cursor');
-    
-    // Fetch images from Cloudinary
+
     const result = await cloudinary.api.resources({
       resource_type: 'image',
       type: 'upload',
