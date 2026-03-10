@@ -31,6 +31,7 @@ async function main() {
 
   let added = 0;
   for (const tenant of tenants) {
+    if (!tenant) continue;
     const existing = await db
       .select()
       .from(pageSectionsTable)
