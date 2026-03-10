@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Lock, Unlock, Clock, Store } from "lucide-react";
 import { useTenantId } from "./TenantProvider";
@@ -30,8 +31,12 @@ import { TenantSelectorModal } from "./TenantSelectorModal";
  */
 export function AdminButton() {
   const { user } = useUser();
+  const pathname = usePathname();
   const [showPendingModal, setShowPendingModal] = useState(false);
   const signInTriggerRef = useRef<HTMLButtonElement>(null);
+  
+  // Preserve current path (with tenant) after sign-in so admin stays in correct store
+  const redirectAfterSignIn = pathname && pathname !== "/" ? pathname : undefined;
   
   // Check if user has admin role AND tenant access (1 client = 1 tenant)
   const tenantId = useTenantId();
@@ -49,9 +54,16 @@ export function AdminButton() {
       if (pending) {
         setShowPendingModal(true);
       } else {
+        // Store current path so Clerk's delayed redirect goes to correct tenant
+        if (pathname && pathname !== '/') {
+          document.cookie = `redirect_after_signin=${encodeURIComponent(pathname)}; path=/; max-age=300; SameSite=Lax`;
+        }
         signInTriggerRef.current?.click();
       }
     } catch {
+      if (pathname && pathname !== '/') {
+        document.cookie = `redirect_after_signin=${encodeURIComponent(pathname)}; path=/; max-age=300; SameSite=Lax`;
+      }
       signInTriggerRef.current?.click();
     }
   };
@@ -60,7 +72,7 @@ export function AdminButton() {
     <>
       {/* User is NOT signed in */}
       <SignedOut>
-        <SignInButton mode="modal">
+        <SignInButton mode="modal" forceRedirectUrl={redirectAfterSignIn}>
           <button
             ref={signInTriggerRef}
             type="button"
@@ -119,7 +131,7 @@ export function AdminButton() {
           
           {/* Clerk's built-in user menu button */}
           <UserButton 
-            afterSignOutUrl="/api/admin-signout-callback"
+            afterSignOutUrl={pathname ? `/api/admin-signout-callback?returnTo=${encodeURIComponent(pathname)}` : "/api/admin-signout-callback"}
             appearance={{
               elements: {
                 avatarBox: "h-9 w-9 rounded-full border-2 border-[#1DA1F9]",

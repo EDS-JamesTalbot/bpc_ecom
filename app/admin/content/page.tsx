@@ -6,13 +6,17 @@ import { getAllProducts } from '@/src/db/queries/products';
 import { getAllTestimonials } from '@/src/db/queries/testimonials';
 import { getAllPageSections } from '@/src/db/queries/page-sections';
 import { getAllSiteSettings } from '@/src/db/queries/site-settings';
+import { getTenantSlugForRequest } from '@/lib/tenant-context';
+import { withTenantPrefix } from '@/lib/tenant-utils';
 
 export default async function AdminContentDashboard() {
   try {
     await requireAdminWithTenantAccess();
   } catch {
-    redirect('/shop');
+    const tenantSlug = await getTenantSlugForRequest();
+    redirect(withTenantPrefix('/shop', tenantSlug));
   }
+  const tenantSlug = await getTenantSlugForRequest();
   let products, testimonials, pageSections, siteSettings;
   
   try {
@@ -71,7 +75,7 @@ export default async function AdminContentDashboard() {
               </div>
             </div>
           </div>
-          <Link href="/shop">
+          <Link href={withTenantPrefix('/shop', tenantSlug)}>
             <Button className="w-full !bg-primary hover:!bg-secondary-foreground !text-white shadow">
               Manage Products
             </Button>
@@ -96,7 +100,7 @@ export default async function AdminContentDashboard() {
               </div>
             </div>
           </div>
-          <Link href="/admin/content/testimonials">
+          <Link href={withTenantPrefix('/admin/content/testimonials', tenantSlug)}>
             <Button className="w-full !bg-primary hover:!bg-secondary-foreground !text-white shadow">
               Manage Testimonials
             </Button>
@@ -121,7 +125,7 @@ export default async function AdminContentDashboard() {
               </div>
             </div>
           </div>
-          <Link href="/admin/content/page-sections">
+          <Link href={withTenantPrefix('/admin/content/page-sections', tenantSlug)}>
             <Button className="w-full !bg-primary hover:!bg-secondary-foreground !text-white shadow">
               Manage Page Sections
             </Button>
@@ -143,7 +147,7 @@ export default async function AdminContentDashboard() {
               </div>
             </div>
           </div>
-          <Link href="/admin/content/site-settings">
+          <Link href={withTenantPrefix('/admin/content/site-settings', tenantSlug)}>
             <Button className="w-full !bg-primary hover:!bg-secondary-foreground !text-white shadow">
               Manage Settings
             </Button>
@@ -160,7 +164,7 @@ export default async function AdminContentDashboard() {
               View product sales summary, top customers, and trends
             </p>
           </div>
-          <Link href="/admin/sales">
+          <Link href={withTenantPrefix('/admin/sales', tenantSlug)}>
             <Button className="w-full !bg-primary hover:!bg-secondary-foreground !text-white shadow">
               View Sales
             </Button>
@@ -182,7 +186,7 @@ export default async function AdminContentDashboard() {
               </div>
             </div>
           </div>
-          <Link href="/admin/content/theme-editor">
+          <Link href={withTenantPrefix('/admin/content/theme-editor', tenantSlug)}>
             <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
               Edit Theme
             </Button>

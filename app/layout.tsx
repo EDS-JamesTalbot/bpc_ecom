@@ -99,6 +99,8 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider
+      signInFallbackRedirectUrl="/api/after-sign-in"
+      signUpFallbackRedirectUrl="/api/after-sign-in"
       appearance={{
         elements: {
           // Main card container

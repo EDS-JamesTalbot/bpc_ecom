@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 import { requireAdminWithTenantAccess } from '@/lib/admin-auth';
+import { getTenantSlugForRequest } from '@/lib/tenant-context';
+import { withTenantPrefix } from '@/lib/tenant-utils';
 import {
   getProductSalesSummary,
   getTopCustomers,
@@ -14,7 +16,8 @@ export default async function AdminSalesPage() {
   try {
     await requireAdminWithTenantAccess();
   } catch {
-    redirect('/shop');
+    const tenantSlug = await getTenantSlugForRequest();
+    redirect(withTenantPrefix('/shop', tenantSlug));
   }
   let productSummary: Awaited<ReturnType<typeof getProductSalesSummary>>;
   let topCustomers: Awaited<ReturnType<typeof getTopCustomers>>;
