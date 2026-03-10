@@ -60,7 +60,7 @@ export function StoreNameCard({
             Store Name
           </h2>
           <p className="text-sm text-[#475569] mb-4">
-            This appears in the <strong>browser tab</strong> and in the site header. Set it to &quot;Loveys Soap&quot; or your store name.
+            This appears in the <strong>browser tab</strong> and in the site header. Enter your store or business name.
           </p>
 
           {isEditing ? (
@@ -71,7 +71,7 @@ export function StoreNameCard({
                   id="storeName"
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
-                  placeholder="e.g. Loveys Soap"
+                  placeholder="e.g. Your Store Name"
                   className="mt-1"
                 />
               </div>
