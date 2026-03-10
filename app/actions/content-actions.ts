@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { requireAdminWithTenantAccess } from '@/lib/admin-auth';
+import { getTenantSlugForRequest } from '@/lib/tenant-context';
 import {
   createTestimonial,
   updateTestimonial,
@@ -137,6 +138,18 @@ export async function toggleTestimonialActiveAction(id: number) {
 // PAGE SECTION ACTIONS
 // ============================================
 
+/** Revalidate home and tenant paths so page section updates show immediately */
+async function revalidatePageSectionPaths(page: string) {
+  revalidatePath('/');
+  revalidatePath('/testimonials');
+  revalidatePath('/admin/content/page-sections');
+  const tenantSlug = await getTenantSlugForRequest();
+  if (tenantSlug) {
+    revalidatePath(`/${tenantSlug}`);
+    revalidatePath(`/${tenantSlug}/testimonials`);
+  }
+}
+
 const pageSectionSchema = z.object({
   sectionKey: z.string().min(1, 'Section key is required').max(100),
   page: z.string().min(1, 'Page is required').max(50),
@@ -163,9 +176,7 @@ export async function upsertPageSectionAction(input: PageSectionInput) {
     
     const section = await upsertPageSection(validated.sectionKey, validated);
     
-    revalidatePath('/');
-    revalidatePath(`/${validated.page}`);
-    revalidatePath('/admin/content/page-sections');
+    await revalidatePageSectionPaths(validated.page);
     
     return { success: true, data: section };
   } catch (error) {
@@ -201,9 +212,7 @@ export async function updatePageSectionAction(id: number, input: Partial<PageSec
       return { success: false, error: 'Page section not found' };
     }
     
-    revalidatePath('/');
-    revalidatePath(`/${updated.page}`);
-    revalidatePath('/admin/content/page-sections');
+    await revalidatePageSectionPaths(updated.page);
     
     return { success: true, data: updated };
   } catch (error) {
@@ -224,8 +233,7 @@ export async function deletePageSectionAction(id: number) {
     
     await deletePageSection(id);
     
-    revalidatePath('/');
-    revalidatePath('/admin/content/page-sections');
+    await revalidatePageSectionPaths('home');
     
     return { success: true };
   } catch (error) {
@@ -247,9 +255,7 @@ export async function togglePageSectionActiveAction(id: number) {
       return { success: false, error: 'Page section not found' };
     }
     
-    revalidatePath('/');
-    revalidatePath(`/${updated.page}`);
-    revalidatePath('/admin/content/page-sections');
+    await revalidatePageSectionPaths(updated.page);
     
     return { success: true, data: updated };
   } catch (error) {

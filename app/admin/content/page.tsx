@@ -114,7 +114,7 @@ export default async function AdminContentDashboard() {
               Page Sections
             </h2>
             <p className="text-sm text-muted-foreground mb-4 min-h-[2.5rem]">
-              Edit content for home, contact, and other pages
+              Edit home banners: Why Choose Us, Customer Favorite Products, Experience the Difference (CTA), contact, and more
             </p>
             <div className="flex gap-4 text-sm">
               <div>

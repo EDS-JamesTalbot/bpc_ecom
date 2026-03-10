@@ -10,6 +10,7 @@ export default async function Home() {
   const heroSection = await getPageSectionByKey('home_hero');
   const aboutSection = await getPageSectionByKey('home_about');
   const whyChooseSection = await getPageSectionByKey('home_why_choose');
+  const favoriteProductsSection = await getPageSectionByKey('home_favorite_products');
   const ctaSection = await getPageSectionByKey('home_cta');
   
   // Parse content with fallbacks
@@ -34,6 +35,15 @@ export default async function Home() {
       { icon: "🌿", title: "Feature One", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore." },
       { icon: "✨", title: "Feature Two", description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo." },
       { icon: "💙", title: "Feature Three", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." }
+    ]
+  };
+
+  let favoriteProductsContent = {
+    heading: "Customer Favorite Products",
+    products: [
+      { title: "Product One", quote: "Lorem ipsum dolor sit amet, consectetur adipiscing.", description: "Sed do eiusmod tempor incididunt ut labore" },
+      { title: "Product Two", quote: "Ut enim ad minim veniam, quis nostrud.", description: "Excepteur sint occaecat cupidatat non proident" },
+      { title: "Product Three", quote: "Duis aute irure dolor in reprehenderit.", description: "Nemo enim ipsam voluptatem quia voluptas" }
     ]
   };
   
@@ -84,6 +94,14 @@ export default async function Home() {
       // Handle features - must be an array of objects
       if (parsed.features && Array.isArray(parsed.features)) {
         whyChooseContent.features = parsed.features;
+      }
+    }
+
+    if (favoriteProductsSection?.content) {
+      const parsed = JSON.parse(favoriteProductsSection.content);
+      if (parsed.heading) favoriteProductsContent.heading = parsed.heading;
+      if (parsed.products && Array.isArray(parsed.products)) {
+        favoriteProductsContent.products = parsed.products;
       }
     }
     
@@ -167,44 +185,25 @@ export default async function Home() {
         <section className="mb-12">
           <div className="rounded-2xl bg-white p-12 shadow-lg">
             <h2 className="text-4xl font-bold text-[#0c4a6e] mb-8 text-center">
-              Customer Favorite Products
+              {favoriteProductsContent.heading}
             </h2>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 p-6 shadow-md border-2 border-blue-300/50 hover:border-blue-400/70 transition-all">
-                <h3 className="text-2xl font-semibold text-[#0c4a6e] mb-3">
-                  Product One
-                </h3>
-                <p className="text-lg leading-relaxed text-[#475569] mb-3">
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing."
-                </p>
-                <p className="text-lg leading-relaxed text-[#475569] italic">
-                  Sed do eiusmod tempor incididunt ut labore
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 p-6 shadow-md border-2 border-blue-300/50 hover:border-blue-400/70 transition-all">
-                <h3 className="text-2xl font-semibold text-[#0c4a6e] mb-3">
-                  Product Two
-                </h3>
-                <p className="text-lg leading-relaxed text-[#475569] mb-3">
-                  "Ut enim ad minim veniam, quis nostrud."
-                </p>
-                <p className="text-lg leading-relaxed text-[#475569] italic">
-                  Excepteur sint occaecat cupidatat non proident
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 p-6 shadow-md border-2 border-blue-300/50 hover:border-blue-400/70 transition-all">
-                <h3 className="text-2xl font-semibold text-[#0c4a6e] mb-3">
-                  Product Three
-                </h3>
-                <p className="text-lg leading-relaxed text-[#475569] mb-3">
-                  "Duis aute irure dolor in reprehenderit."
-                </p>
-                <p className="text-lg leading-relaxed text-[#475569] italic">
-                  Nemo enim ipsam voluptatem quia voluptas
-                </p>
-              </div>
+              {favoriteProductsContent.products.map((product, index) => (
+                <div
+                  key={index}
+                  className="rounded-xl bg-gradient-to-br from-slate-50 to-blue-50 p-6 shadow-md border-2 border-blue-300/50 hover:border-blue-400/70 transition-all"
+                >
+                  <h3 className="text-2xl font-semibold text-[#0c4a6e] mb-3">
+                    {product.title}
+                  </h3>
+                  <p className="text-lg leading-relaxed text-[#475569] mb-3">
+                    &quot;{product.quote}&quot;
+                  </p>
+                  <p className="text-lg leading-relaxed text-[#475569] italic">
+                    {product.description}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>

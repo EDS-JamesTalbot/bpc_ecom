@@ -20,6 +20,7 @@
     "db:migrate:multi-tenant": "tsx scripts/migrate-multi-tenant.ts",
     "db:migrate:tenant-config-name": "tsx scripts/add-tenant-config-name.ts",
     "db:copy-content": "tsx scripts/copy-content-to-tenant.ts",
+    "db:add-favorite-products": "tsx scripts/add-home-favorite-products.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",

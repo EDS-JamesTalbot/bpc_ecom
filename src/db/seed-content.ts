@@ -142,6 +142,20 @@ async function seedContent() {
         isActive: true,
       },
       {
+        sectionKey: 'home_favorite_products',
+        page: 'home',
+        title: 'Home - Customer Favorite Products',
+        content: JSON.stringify({
+          heading: "Customer Favorite Products",
+          products: [
+            { title: "Product One", quote: "Lorem ipsum dolor sit amet, consectetur adipiscing.", description: "Sed do eiusmod tempor incididunt ut labore" },
+            { title: "Product Two", quote: "Ut enim ad minim veniam, quis nostrud.", description: "Excepteur sint occaecat cupidatat non proident" },
+            { title: "Product Three", quote: "Duis aute irure dolor in reprehenderit.", description: "Nemo enim ipsam voluptatem quia voluptas" }
+          ]
+        }),
+        isActive: true,
+      },
+      {
         sectionKey: 'home_cta',
         page: 'home',
         title: 'Home - Call to Action',
