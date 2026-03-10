@@ -6,7 +6,7 @@ import type { PageSection } from '@/src/db/schema';
 const KEY_SECTIONS = [
   { key: 'home_why_choose', label: 'Why Customers Choose Us', description: 'Features with icons' },
   { key: 'home_favorite_products', label: 'Customer Favorite Products', description: 'Product highlights' },
-  { key: 'home_cta', label: 'Experience the Difference', description: 'CTA banner with Shop Now button' },
+  { key: 'home_cta', label: 'Experience the Difference', description: 'CTA banner (bottom of home & testimonials)' },
 ] as const;
 
 interface HomePageBannersCardProps {

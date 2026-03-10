@@ -13,10 +13,11 @@ export default async function TestimonialsPage() {
   // Fetch testimonials from database
   const testimonials = await getActiveTestimonials();
   
-  // Fetch page sections (reuse home sections for Why Choose Us & Favorite Products)
+  // Fetch page sections (reuse home sections for Why Choose Us, Favorite Products & CTA)
   const heroSection = await getPageSectionByKey('testimonials_hero');
   const whyChooseSection = await getPageSectionByKey('home_why_choose');
   const favoriteProductsSection = await getPageSectionByKey('home_favorite_products');
+  const ctaSection = await getPageSectionByKey('home_cta');
 
   // Parse hero content with fallbacks
   let heroContent = {
@@ -45,6 +46,13 @@ export default async function TestimonialsPage() {
     ]
   };
 
+  let ctaContent = {
+    heading: "Experience the Difference Yourself",
+    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+    buttonText: "Shop Now",
+    buttonLink: "/shop"
+  };
+
   if (heroSection?.content) {
     try {
       heroContent = JSON.parse(heroSection.content);
@@ -66,6 +74,16 @@ export default async function TestimonialsPage() {
       const parsed = JSON.parse(favoriteProductsSection.content);
       if (parsed.heading) favoriteProductsContent.heading = parsed.heading;
       if (parsed.products && Array.isArray(parsed.products)) favoriteProductsContent.products = parsed.products;
+    } catch { /* use defaults */ }
+  }
+
+  if (ctaSection?.content) {
+    try {
+      const parsed = JSON.parse(ctaSection.content);
+      if (parsed.heading) ctaContent.heading = parsed.heading;
+      if (parsed.text) ctaContent.text = parsed.text;
+      if (parsed.buttonText) ctaContent.buttonText = parsed.buttonText;
+      if (parsed.buttonLink) ctaContent.buttonLink = parsed.buttonLink;
     } catch { /* use defaults */ }
   }
   return (
@@ -158,21 +176,21 @@ export default async function TestimonialsPage() {
           </div>
         </section>
 
-        {/* CTA SECTION */}
+        {/* CTA SECTION - uses home_cta (editable in Page Sections) */}
         <section className="text-center">
           <div className="rounded-2xl bg-gradient-to-br from-[#e0f2fe] to-[#bfdbfe] p-12 shadow-xl">
             <h2 className="text-4xl font-bold text-[#0c4a6e] mb-6">
-              Experience the Difference Yourself
+              {ctaContent.heading}
             </h2>
             <p className="text-xl text-[#475569] mb-8 max-w-2xl mx-auto">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+              {ctaContent.text}
             </p>
-            <Link href={withTenantPrefix('/shop', tenantSlug)}>
+            <Link href={withTenantPrefix(ctaContent.buttonLink, tenantSlug)}>
               <Button 
                 size="lg" 
                 className="bg-[#1DA1F9] text-white hover:bg-[#0c4a6e] text-xl px-12 py-6 transition-colors"
               >
-                Shop Now
+                {ctaContent.buttonText}
               </Button>
             </Link>
           </div>
